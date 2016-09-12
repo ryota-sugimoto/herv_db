@@ -1,6 +1,24 @@
-var main_div = document.getElementById("main");
+function Graphs(graphs) {
+  this.div = document.createElement("div");
+  this._graphs = [];
+  for (var i=0; i<graphs.length; i++) {
+    var div = document.createElement("div");
+    div.setAttribute("id", graphs[i].title);
+    var o = {"div": div,
+             "title": graphs[i].title,
+             "draw": graphs[i].draw}
+    this._graphs.push(o);
+    this.div.appendChild(div);
+  }
+}
 
-function get_herv_list(element) {
+Graphs.prototype.draw = function(herv_name) {
+  for (var i=0; i<this._graphs.length; i++) {
+    this._graphs[i].draw(herv_name, this._graphs[i].div);
+  }
+}
+
+function herv_list(div, graphs) {
   var request = new XMLHttpRequest();
   request.open("GET", "herv_list", true);
   request.onreadystatechange = function () {
@@ -10,23 +28,27 @@ function get_herv_list(element) {
       var out = "";
       for (i = 0; i < hervs.length; i++) {
         out += '<li id="' + hervs[i].id + '">' +
-                hervs[i].name + '</li>';
+               hervs[i].name + '</li>';
       }
       var ul = document.createElement("ul");
       ul.setAttribute("id", "herv_list");
       ul.innerHTML = out;
-      element.appendChild(ul);
+      function herv_list_onclick(event) {
+        if (event.target.tagName == "LI") {
+          graphs.draw(event.target.id);
+        }
+      }
+      ul.addEventListener("click", herv_list_onclick, false);
+      div.appendChild(ul);
     }
   }
-  request.send()
+  request.send();
 }
 
-function tfbs_depth_graph(herv_name, element) {
+function tfbs_depth_graph(herv_name, div) {
   var request = new XMLHttpRequest()
   request.open("GET", "graph_data/tfbs_depth/"+herv_name, true)
-  var div = document.createElement("div");
   div.setAttribute("id", "tfbs_depth_graph:"+herv_name);
-  element.appendChild(div);
   request.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       var data = JSON.parse(this.responseText);
@@ -39,5 +61,25 @@ function tfbs_depth_graph(herv_name, element) {
   request.send();
 }
 
-get_herv_list(main_div);
-tfbs_depth_graph("LTR5_Hs", main_div);
+function motif_depth_graph(herv_name, div) {
+  var request = new XMLHttpRequest()
+  request.open("GET", "graph_data/motif_depth/"+herv_name, true)
+  div.setAttribute("id", "motif_depth_graph:"+herv_name);
+  request.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      var data = JSON.parse(this.responseText);
+      var layout = { title: "Motif Depth",
+                     xaxis: { title: "Position (nt)" },
+                     yaxis: { title: "TF motif in HERV-TFBSs (copy)" }};
+      Plotly.newPlot(div, data, layout);
+    }
+  }
+  request.send();
+}
+var main_div = document.getElementById("main");
+var graphs = new Graphs([{title: "TFBS depth", draw: tfbs_depth_graph},
+                         {title: "Motif depth", draw: motif_depth_graph}]);
+var herv_list_div = document.createElement("div");
+main_div.appendChild(herv_list_div);
+main_div.appendChild(graphs.div);
+herv_list(herv_list_div, graphs);

@@ -28,12 +28,20 @@ def herv_list(request):
 
 @app.route("/graph_data/tfbs_depth/<herv_name>")
 def tbfs_depth(request, herv_name):
-  f = open("./graph_data/tf_depth/"+herv_name+".json")
-  return "".join(list(f))
+  try:
+    f = open("./graph_data/tf_depth/"+herv_name+".json")
+    return "".join(list(f))
+  except IOError:
+    request.setResponseCode(404)
+    return "File not found."
 
 @app.route("/graph_data/motif_depth/<herv_name>")
-def motif_depth(request, herv_name):
-  f = open("./graph_data/motif_depth/"+herv_name+".json")
-  return "".join(list(f))
+def motif_depth(request, herv_name,z_score,db_name):
+  try:
+    f = open("./graph_data/motif_depth/"+herv_name+".json")
+    return "".join(list(f))
+  except IOError:
+    request.setResponseCode(404)
+    return "File not found."
 
 app.run("ilabws03.lab.nig.ac.jp", 8080)
