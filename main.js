@@ -76,10 +76,11 @@ function motif_depth_graph(herv_name, div) {
   }
   request.send();
 }
-var main_div = document.getElementById("main");
 var graphs = new Graphs([{title: "TFBS depth", draw: tfbs_depth_graph},
                          {title: "Motif depth", draw: motif_depth_graph}]);
+var left_div = document.getElementById("left");
+var right_div = document.getElementById("right");
 var herv_list_div = document.createElement("div");
-main_div.appendChild(herv_list_div);
-main_div.appendChild(graphs.div);
+left_div.appendChild(herv_list_div);
+right_div.appendChild(graphs.div);
 herv_list(herv_list_div, graphs);
