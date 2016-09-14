@@ -2,7 +2,6 @@
     padding: 0; }
 
 h1 { width: 100vw;
-     height: 10hw;
      position: center;
      border-bottom: 1px solid black; }
 
@@ -10,18 +9,20 @@ h1 { width: 100vw;
 div#wrap { width: 100vw;
            height: 90vh; }
 
-div#parameter_box { padding-top: 5px;
-                    padding-bottom: 5px; 
-                    padding-left:5px;
+div#parameter_box { height: 30px;
+                    padding-left: 5px;
                     border-bottom: 1px solid black; }
 
 div#left { display: inline-block;
            width: 20%;
-           height: 90vh;
-           overflow: auto;
            border-right: 1px solid black; }
 
-div#left ul { list-style-type: none; }
+div#herv_menu { height: calc(90vh - 15px);
+                overflow: auto; }
+
+div#left ul { padding-left: 5px;
+              padding-right: 5px;
+              list-style-type: none; }
 
 div#left li:hover { cursor: hand;
                     background-color: yellow; }
