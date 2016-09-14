@@ -11,8 +11,8 @@ app = Klein()
 dbpool = adbapi.ConnectionPool("pymysql",
   host='database-db-instance.cvtysiszh5lk.ap-northeast-1.rds.amazonaws.com',
   port=3306,
-  user='jampei',
-  passwd='Jam03300513',
+  user='web',
+  passwd='hervdb508',
   db='Graph_db',
   charset='utf8')
 
