@@ -46,7 +46,7 @@ function herv_list(div, graphs) {
 }
 
 function tfbs_depth_graph(herv_name, div) {
-  var request = new XMLHttpRequest()
+  var request = new XMLHttpRequest();
   request.open("GET", "graph_data/tfbs_depth/"+herv_name, true)
   div.setAttribute("id", "tfbs_depth_graph:"+herv_name);
   request.onreadystatechange = function() {
@@ -62,7 +62,7 @@ function tfbs_depth_graph(herv_name, div) {
 }
 
 function motif_depth_graph(herv_name, div) {
-  var request = new XMLHttpRequest()
+  var request = new XMLHttpRequest();
   request.open("GET", "graph_data/motif_depth/"+herv_name, true)
   div.setAttribute("id", "motif_depth_graph:"+herv_name);
   request.onreadystatechange = function() {
@@ -76,8 +76,26 @@ function motif_depth_graph(herv_name, div) {
   }
   request.send();
 }
+
+function dhs_depth_graph(herv_name, div) {
+  var request = new XMLHttpRequest();
+  request.open("GET", "graph_data/dhs_depth/"+herv_name, true)
+  div.setAttribute("id", "dhs_depth_graph:"+herv_name);
+  request.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      var data = JSON.parse(this.responseText);
+      var layout = { title: "DHS Depth",
+                     xaxis: { title: "Position (nt)" },
+                     yaxis: { title: "HERV-DHSs (copy)" }};
+      Plotly.newPlot(div, data, layout);
+    }
+  }
+  request.send();
+}
+
 var graphs = new Graphs([{title: "TFBS depth", draw: tfbs_depth_graph},
-                         {title: "Motif depth", draw: motif_depth_graph}]);
+                         {title: "Motif depth", draw: motif_depth_graph},
+                         {title: "DHS depth", draw: dhs_depth_graph}]);
 var herv_menu_div = document.getElementById("herv_menu");
 var right_div = document.getElementById("right");
 var herv_list_div = document.createElement("div");

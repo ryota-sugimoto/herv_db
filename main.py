@@ -43,7 +43,7 @@ def css(request):
 def herv_list(request):
   return herv_list_json
 
-def convert_jason(l):
+def convert_json(l):
   res = []
   for t in l:
     d = {}
@@ -58,7 +58,7 @@ def tbfs_depth(request, herv_name):
   query = 'SELECT T.TF, D.Depth FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN TFBS_depth AS D WHERE HT.HERV="%s" AND HT.HCREs="%s" AND T.Project REGEXP "%s" AND HT.Z_score >= %s ORDER BY HT.Z_score DESC LIMIT %s;'
   query = query % (str(herv_name), "Yes", "Roadmap|ENCODE", "3", "10")
   d = dbpool.runQuery(query)
-  d.addCallback(convert_jason)
+  d.addCallback(convert_json)
   return d
   
 @app.route("/graph_data/motif_depth/<herv_name>")
@@ -66,7 +66,29 @@ def motif_depth(request, herv_name):
   query = 'SELECT T.TF, D.Depth FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Motif_depth AS D WHERE HT.HERV="%s" AND HT.HCREs="%s" AND T.Project REGEXP "%s" AND HT.Z_score >= %s ORDER BY HT.Z_score DESC LIMIT %s ;'
   query = query % (str(herv_name), "Yes", "Roadmap|ENCODE", "3", "10")
   d = dbpool.runQuery(query)
-  d.addCallback(convert_jason)
+  d.addCallback(convert_json)
+  return d
+
+def dhs_convert_json(l):
+  res = []
+  for t in l:
+    d = {}
+    d["name"] = t[0].replace("UniPk","")
+    d["y"] = [ int(i) for i in t[1].split(",") ]
+    res.append(d)
+  return json.dumps(res)
+@app.route("/graph_data/dhs_depth/<herv_name>")
+def dhs_depth(request, herv_name):
+  rep = "No"
+  z_score = "3"
+  threshold = "10"
+  if rep == "Yes":
+    query = 'SELECT DHS_data, Depth FROM DHS_depth WHERE HERV="%s" AND DHS_Data IN ("UwdukeGm12878UniPk","UwdukeH1hescUniPk","UwdukeK562UniPk","UwdukeHepg2UniPk","UwdukeHelas3UniPk","UwdukeHuvecUniPk","UwdukeA549UniPk","UwdukeMcf7UniPk") AND Z_score >= %s ORDER BY Z_score DESC LIMIT %s;'
+  else:
+    query = 'SELECT DHS_data, Depth FROM DHS_depth WHERE HERV="%s" AND Z_score >= %s ORDER BY Z_score DESC LIMIT %s;'
+  query = query % (str(herv_name), threshold, z_score)
+  d = dbpool.runQuery(query)
+  d.addCallback(dhs_convert_json)
   return d
 
 app.run("ilabws03.lab.nig.ac.jp", 8080)
