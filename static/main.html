@@ -6,10 +6,20 @@
 <body>
 <script src="static/plotly.min.js"></script>
 <div id="wrap">
-  <h1>HERV Regulatory Element Database</h1>
+  <div id="title"><h1>HERV Regulatory Element Database</h1></div>
   <div id="contents">
     <div id="left">
-      <p>Z_score &gt;= <input id="z_score"></p>
+      <div id="param_box">
+        Database:
+        <select id="db">
+          <option value="Roadmap|ENCODE">Roadmap and ENCODE</option>
+          <option value="Roadmap">Roadmap</option>
+          <option value="ENCODE">ENCODE</option>
+        </select></br>
+      <input id="hcre" type="checkbox" name="hcre" value="hcre" checked>HCRE</input></br>
+      z_score &gt;= <input id="z_score" value="3"></br>
+      Show limit = <input id="limit" value="10">
+      </div>
       <div id="herv_menu"></div>
     </div>
     <div id="right">
