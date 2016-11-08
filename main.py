@@ -17,11 +17,11 @@ dbpool = adbapi.ConnectionPool("pymysql",
 
 def get_params(request):
   d = {}
-  hcre = request.args.get("hcre", ["false"])[0]
+  hcre = request.args.get("hcre", ["true"])[0]
   if hcre == "true":
     d["hcre"] = "Yes"
   elif hcre == "false":
-    d["hcre"] = "No"
+    d["hcre"] = "Yes|No"
   else:
     d["hcre"] = "Yes"
   
@@ -43,6 +43,11 @@ def get_params(request):
   else:
     d["limit"] = "10"
   
+  representative = request.args.get("representative", ["true"])[0]
+  if representative == "true":
+    d["representative"] = True
+  else:
+    d["representative"] = False
   return d
 
 @app.route("/static/<file_name>")
@@ -66,7 +71,7 @@ def convert_json(l):
   return json.dumps(res)
 @app.route("/graph_data/tfbs_depth/<herv_name>")
 def tbfs_depth(request, herv_name):
-  query = 'SELECT T.TF, D.Depth FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN TFBS_depth AS D WHERE HT.HERV="%s" AND HT.HCREs="%s" AND T.Project REGEXP "%s" AND HT.Z_score >= %s ORDER BY HT.Z_score DESC LIMIT %s;'
+  query = 'SELECT T.TF, D.Depth FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN TFBS_depth AS D WHERE HT.HERV="%s" AND HT.HCREs REGEXP "%s" AND T.Project REGEXP "%s" AND HT.Z_score >= %s ORDER BY HT.Z_score DESC LIMIT %s;'
   params = get_params(request)
   query = query % (str(herv_name), params["hcre"],
                                    params["db"],
@@ -78,7 +83,7 @@ def tbfs_depth(request, herv_name):
   
 @app.route("/graph_data/motif_depth/<herv_name>")
 def motif_depth(request, herv_name):
-  query = 'SELECT T.TF, D.Depth FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Motif_depth AS D WHERE HT.HERV="%s" AND HT.HCREs="%s" AND T.Project REGEXP "%s" AND HT.Z_score >= %s ORDER BY HT.Z_score DESC LIMIT %s ;'
+  query = 'SELECT T.TF, D.Depth FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Motif_depth AS D WHERE HT.HERV="%s" AND HT.HCREs REGEXP "%s" AND T.Project REGEXP "%s" AND HT.Z_score >= %s ORDER BY HT.Z_score DESC LIMIT %s ;'
   params = get_params(request)
   query = query % (str(herv_name), params["hcre"],
                                    params["db"],
@@ -99,12 +104,11 @@ def dhs_convert_json(l):
   return json.dumps(res)
 @app.route("/graph_data/dhs_depth/<herv_name>")
 def dhs_depth(request, herv_name):
-  rep = "No"
-  if rep == "Yes":
+  params = get_params(request)
+  if params["representative"]:
     query = 'SELECT DHS_data, Depth FROM DHS_depth WHERE HERV="%s" AND DHS_Data IN ("UwdukeGm12878UniPk","UwdukeH1hescUniPk","UwdukeK562UniPk","UwdukeHepg2UniPk","UwdukeHelas3UniPk","UwdukeHuvecUniPk","UwdukeA549UniPk","UwdukeMcf7UniPk") AND Z_score >= %s ORDER BY Z_score DESC LIMIT %s;'
   else:
     query = 'SELECT DHS_data, Depth FROM DHS_depth WHERE HERV="%s" AND Z_score >= %s ORDER BY Z_score DESC LIMIT %s;'
-  params = get_params(request)
   query = query % (str(herv_name), params["z_score"], params["limit"])
   d = dbpool.runQuery(query)
   d.addCallback(dhs_convert_json)
@@ -156,6 +160,8 @@ def TFBS_map_json(t):
           "colorscale": [[0, "white"], [1,"red"]],
           "showscale": False }
   n_x = len(t)
+  if n_x == 0:
+    return json.dumps([])
   n_y = len(t[0][1].split(","))
   res["x"] = [x for x,z in t]
   res["y"] = range(n_y)
@@ -167,7 +173,7 @@ def TFBS_map_json(t):
   return json.dumps([res])
 @app.route("/graph_data/TFBS_phylogeny/<herv_name>")
 def TFBS_phylogeny_graph(request, herv_name):
-  query = 'SELECT T.TF, TB.TF_binding FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN TFBS_with_phylogeny AS TB WHERE HT.HERV="%s" AND HT.HCREs="%s" AND T.Project REGEXP "%s" AND HT.Z_score >= %s ORDER BY HT.Z_score DESC LIMIT %s ;'
+  query = 'SELECT T.TF, TB.TF_binding FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN TFBS_with_phylogeny AS TB WHERE HT.HERV="%s" AND HT.HCREs REGEXP "%s" AND T.Project REGEXP "%s" AND HT.Z_score >= %s ORDER BY HT.Z_score DESC LIMIT %s ;'
   params = get_params(request)
   query = query % (str(herv_name), params["hcre"],
                                    params["db"],
@@ -182,6 +188,8 @@ def motif_map_json(t):
           "colorscale": [[0, "white"], [1,"black"]],
           "showscale": False }
   n_x = len(t)
+  if n_x == 0:
+    return json.dumps([])
   n_y = len(t[0][2].split(","))
   res["x"] = [x1+x2 for x1,x2,_ in t]
   res["y"] = range(n_y)

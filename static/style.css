@@ -6,6 +6,7 @@ div#wrap { height: 95vh;
 div#contents { display: flex;
                flex-direction: row; }
 
+div#param_box { margin-bottom: 5px; }
 
 div#left { display: flex;
            flex-direction: column; }

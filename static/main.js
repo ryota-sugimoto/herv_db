@@ -22,12 +22,16 @@ Graphs.prototype.draw = function(herv_name, params) {
 
 function get_params() {
   var res = [];
-  var db_select = document.getElementById("db");
-  res["db"] = db_select.options[db_select.selectedIndex].value;
-
-  res["hcre"] = document.getElementById("hcre").checked;
-  res["z_score"] = document.getElementById("z_score").value;
-  res["limit"] = document.getElementById("limit").value;
+  var db_select = document.getElementById("db1");
+  res["db1"] = db_select.options[db_select.selectedIndex].value;
+  res["hcre1"] = document.getElementById("hcre1").checked;
+  res["z_score1"] = document.getElementById("z_score1").value;
+  res["limit1"] = document.getElementById("limit1").value;
+  
+  var db_select = document.getElementById("db2");
+  res["representative"] = document.getElementById("represent").checked;
+  res["z_score2"] = document.getElementById("z_score2").value;
+  res["limit2"] = document.getElementById("limit2").value;
   return res
 }
 
@@ -73,17 +77,24 @@ function herv_list(div, graphs) {
 }
 
 
-function create_args(params) {
-  var res = "?db=" + params["db"] + ";" + 
-            "hcre=" + params["hcre"] + ";" + 
-            "z_score=" + params["z_score"] + ";" + 
-            "limit=" + params["limit"] + ";";
+function create_args_for_tfbs(params) {
+  var res = "?db=" + params["db1"] + ";" + 
+            "hcre=" + params["hcre1"] + ";" + 
+            "z_score=" + params["z_score1"] + ";" + 
+            "limit=" + params["limit1"] + ";";
   return res
 }
 
+function create_args_for_dhs(params) {
+  var res = "?db=" + params["db2"] + ";" + 
+            "representative=" + params["representative"] + ";" + 
+            "z_score=" + params["z_score2"] + ";" + 
+            "limit=" + params["limit2"] + ";";
+  return res
+}
 
 function tfbs_depth_graph(herv_name, params, div) {
-  var args = create_args(params);
+  var args = create_args_for_tfbs(params);
   var request = new XMLHttpRequest();
   request.open("GET", "graph_data/tfbs_depth/"+herv_name+args, true)
   request.onreadystatechange = function() {
@@ -99,7 +110,7 @@ function tfbs_depth_graph(herv_name, params, div) {
 }
 
 function motif_depth_graph(herv_name, params, div) {
-  var args = create_args(params);
+  var args = create_args_for_tfbs(params);
   var request = new XMLHttpRequest();
   request.open("GET", "graph_data/motif_depth/"+herv_name+args, true)
   request.onreadystatechange = function() {
@@ -115,7 +126,7 @@ function motif_depth_graph(herv_name, params, div) {
 }
 
 function dhs_depth_graph(herv_name, params, div) {
-  var args = create_args(params);
+  var args = create_args_for_dhs(params);
   var request = new XMLHttpRequest();
   request.open("GET", "graph_data/dhs_depth/"+herv_name+args, true)
   request.onreadystatechange = function() {
@@ -131,9 +142,8 @@ function dhs_depth_graph(herv_name, params, div) {
 }
 
 function chromatin_state_graph(herv_name, params, div) {
-  var args = create_args(params);
   var request = new XMLHttpRequest();
-  request.open("GET", "graph_data/chromatin_state/"+herv_name+args, true)
+  request.open("GET", "graph_data/chromatin_state/"+herv_name, true)
   request.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       var data = JSON.parse(this.responseText);
@@ -147,7 +157,7 @@ function chromatin_state_graph(herv_name, params, div) {
 }
 
 function heatmap_graph(herv_name, params, div) {
-  var args = create_args(params);
+  var args = create_args_for_tfbs(params);
   div.style.display = "flex";
   div.style.flexDirection = "row";
   div.style.overflow = "scroll";
