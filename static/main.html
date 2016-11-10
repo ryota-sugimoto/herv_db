@@ -18,8 +18,13 @@
           <option value="ENCODE">ENCODE</option>
         </select></br>
         <input id="hcre1" type="checkbox" name="hcre" value="hcre" checked>Only HCRE</input></br>
-        z_score &gt;= <input id="z_score1" value="3"></br>
-        Show limit = <input id="limit1" value="10"></br>
+        
+        <form id="z_score_mode">
+          <input type="radio" name="z_score_mode" value="Count" checked>Count based Z score</input></br>
+          <input type="radio" name="z_score_mode" value="Depth">Depth based Z score</input>
+        </form>
+        Z score &gt;=<input id="z_score1" value="3"></input></br>
+        Show limit =<input id="limit1" value="10"></input></br>
         </br>
         Parameters for DHS</br>
         <input id="represent" type="checkbox" name="represent" value="represent" checked>Only representative</input></br>

@@ -48,6 +48,13 @@ def get_params(request):
     d["representative"] = True
   else:
     d["representative"] = False
+  
+  z_score_mode = request.args.get("z_score_mode", ["Count"])[0]
+  if z_score_mode == "Count" or z_score_mode == "Depth":
+    d["z_score_mode"] = z_score_mode
+  else:
+    d["z_score_mode"] = "Count"
+  
   return d
 
 @app.route("/static/<file_name>")
@@ -71,24 +78,20 @@ def convert_json(l):
   return json.dumps(res)
 @app.route("/graph_data/tfbs_depth/<herv_name>")
 def tbfs_depth(request, herv_name):
-  query = 'SELECT T.TF, D.Depth FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN TFBS_depth AS D WHERE HT.HERV="%s" AND HT.HCREs REGEXP "%s" AND T.Project REGEXP "%s" AND HT.Z_score >= %s ORDER BY HT.Z_score DESC LIMIT %s;'
+  query = 'SELECT T.TF, D.Depth FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN TFBS_depth AS D WHERE HT.HERV="%(herv_name)s" AND HT.HCREs REGEXP "%(hcre)s" AND T.Project REGEXP "%(db)s" AND HT.%(z_score_mode)s_based_z_score >= %(z_score)s ORDER BY HT.%(z_score_mode)s_based_z_score DESC LIMIT %(limit)s;'
   params = get_params(request)
-  query = query % (str(herv_name), params["hcre"],
-                                   params["db"],
-                                   params["z_score"],
-                                   params["limit"])
+  params["herv_name"] = str(herv_name)
+  query = query % params
   d = dbpool.runQuery(query)
   d.addCallback(convert_json)
   return d
   
 @app.route("/graph_data/motif_depth/<herv_name>")
 def motif_depth(request, herv_name):
-  query = 'SELECT T.TF, D.Depth FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Motif_depth AS D WHERE HT.HERV="%s" AND HT.HCREs REGEXP "%s" AND T.Project REGEXP "%s" AND HT.Z_score >= %s ORDER BY HT.Z_score DESC LIMIT %s ;'
+  query = 'SELECT T.TF, D.Depth FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Motif_depth AS D WHERE HT.HERV="%(herv_name)s" AND HT.HCREs REGEXP "%(hcre)s" AND T.Project REGEXP "%(db)s" AND HT.%(z_score_mode)s_based_z_score >= %(z_score)s ORDER BY HT.%(z_score_mode)s_based_z_score DESC LIMIT %(limit)s ;'
   params = get_params(request)
-  query = query % (str(herv_name), params["hcre"],
-                                   params["db"],
-                                   params["z_score"],
-                                   params["limit"])
+  params["herv_name"] = str(herv_name)
+  query = query % params
   d = dbpool.runQuery(query)
   d.addCallback(convert_json)
   return d
@@ -106,10 +109,11 @@ def dhs_convert_json(l):
 def dhs_depth(request, herv_name):
   params = get_params(request)
   if params["representative"]:
-    query = 'SELECT DHS_data, Depth FROM DHS_depth WHERE HERV="%s" AND DHS_Data IN ("UwdukeGm12878UniPk","UwdukeH1hescUniPk","UwdukeK562UniPk","UwdukeHepg2UniPk","UwdukeHelas3UniPk","UwdukeHuvecUniPk","UwdukeA549UniPk","UwdukeMcf7UniPk") AND Z_score >= %s ORDER BY Z_score DESC LIMIT %s;'
+    query = 'SELECT DHS_data, Depth FROM DHS_depth WHERE HERV="%(herv_name)s" AND DHS_Data IN ("UwdukeGm12878UniPk","UwdukeH1hescUniPk","UwdukeK562UniPk","UwdukeHepg2UniPk","UwdukeHelas3UniPk","UwdukeHuvecUniPk","UwdukeA549UniPk","UwdukeMcf7UniPk") AND Z_score >= %(z_score)s ORDER BY Z_score DESC LIMIT %(limit)s;'
   else:
-    query = 'SELECT DHS_data, Depth FROM DHS_depth WHERE HERV="%s" AND Z_score >= %s ORDER BY Z_score DESC LIMIT %s;'
-  query = query % (str(herv_name), params["z_score"], params["limit"])
+    query = 'SELECT DHS_data, Depth FROM DHS_depth WHERE HERV="%(herv_name)s" AND Z_score >= %(z_score)s ORDER BY Z_score DESC LIMIT %(limit)s;'
+  params["herv_name"] = herv_name
+  query = query % params
   d = dbpool.runQuery(query)
   d.addCallback(dhs_convert_json)
   return d
@@ -173,12 +177,11 @@ def TFBS_map_json(t):
   return json.dumps([res])
 @app.route("/graph_data/TFBS_phylogeny/<herv_name>")
 def TFBS_phylogeny_graph(request, herv_name):
-  query = 'SELECT T.TF, TB.TF_binding FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN TFBS_with_phylogeny AS TB WHERE HT.HERV="%s" AND HT.HCREs REGEXP "%s" AND T.Project REGEXP "%s" AND HT.Z_score >= %s ORDER BY HT.Z_score DESC LIMIT %s ;'
+  query = 'SELECT T.TF, TB.TF_binding FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN TFBS_with_phylogeny AS TB WHERE HT.HERV="%(herv_name)s" AND HT.HCREs REGEXP "%(hcre)s" AND T.Project REGEXP "%(db)s" AND HT.%(z_score_mode)s_based_z_score >= %(z_score)s ORDER BY HT.%(z_score_mode)s_based_z_score DESC LIMIT %(limit)s ;'
   params = get_params(request)
-  query = query % (str(herv_name), params["hcre"],
-                                   params["db"],
-                                   params["z_score"],
-                                   params["limit"])
+  params["herv_name"] = herv_name
+  query = query % params
+  print query
   d = dbpool.runQuery(query)
   d.addCallback(TFBS_map_json)
   return d
@@ -201,9 +204,11 @@ def motif_map_json(t):
   return json.dumps([res])
 @app.route("/graph_data/motif_phylogeny/<herv_name>")
 def motif_phylogeny_graph(request, herv_name):
-  query = 'SELECT T.TF, M.Motif_Id, Phy.P_value FROM((( Motif_with_phylogeny AS Phy NATURAL JOIN Motif_Id AS M) NATURAL JOIN HCREs_Id AS HC) NATURAL JOIN HERV_TFBS_Id AS HT) NATURAL JOIN TFBS_Id AS T WHERE HT.HERV="%s" AND T.Project REGEXP "%s" AND HT.Z_score >= %s ORDER BY HT.Z_score DESC ;'
+  query = 'SELECT T.TF, M.Motif_Id, Phy.P_value FROM((( Motif_with_phylogeny AS Phy NATURAL JOIN Motif_Id AS M) NATURAL JOIN HCREs_Id AS HC) NATURAL JOIN HERV_TFBS_Id AS HT) NATURAL JOIN TFBS_Id AS T WHERE HT.HERV="%(herv_name)s" AND T.Project REGEXP "%(db)s" AND HT.%(z_score_mode)s_based_z_score >= %(z_score)s ORDER BY HT.%(z_score_mode)s_based_z_score DESC ;'
   params = get_params(request)
-  query = query % (str(herv_name), params["db"], params["z_score"])
+  params["herv_name"] = herv_name
+  query = query % params
+  print query
   d = dbpool.runQuery(query)
   d.addCallback(motif_map_json)
   return d

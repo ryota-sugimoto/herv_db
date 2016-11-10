@@ -19,5 +19,6 @@ div#left ul { list-style-type: none; }
 div#left li:hover { cursor: hand;
                     background-color: yellow; }
 
+form#z_score_mode { margin-bottom: 0px }
 
 div#right { overflow: auto; }
