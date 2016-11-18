@@ -46,14 +46,28 @@ def get_params(request):
   representative = request.args.get("representative", ["true"])[0]
   if representative == "true":
     d["representative"] = True
-  else:
+  elif representative == "false":
     d["representative"] = False
+  else:
+    d["representative"] = True
   
   z_score_mode = request.args.get("z_score_mode", ["Count"])[0]
   if z_score_mode == "Count" or z_score_mode == "Depth":
     d["z_score_mode"] = z_score_mode
   else:
     d["z_score_mode"] = "Count"
+  
+
+  merge_cell_types = request.args.get("merge_cell_types", ["true"])[0]
+  if merge_cell_types == "true":
+    d["merge_cell_types"] = True
+  elif merge_cell_types == "false":
+    d["merge_cell_types"] = False
+  else:
+    d["merge_cell_types"] = True
+  
+  d["tf"] = request.args.get("tf", ["all"])[0]
+  
   
   return d
 
@@ -78,20 +92,24 @@ def convert_json(l):
   return json.dumps(res)
 @app.route("/graph_data/tfbs_depth/<herv_name>")
 def tbfs_depth(request, herv_name):
+  request.responseHeaders.addRawHeader("Content-Type", 
+                                       "application/json")
   query = 'SELECT T.TF, D.Depth FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN TFBS_depth AS D WHERE HT.HERV="%(herv_name)s" AND HT.HCREs REGEXP "%(hcre)s" AND T.Project REGEXP "%(db)s" AND HT.%(z_score_mode)s_based_z_score >= %(z_score)s ORDER BY HT.%(z_score_mode)s_based_z_score DESC LIMIT %(limit)s;'
   params = get_params(request)
   params["herv_name"] = str(herv_name)
-  query = query % params
+  query %= params
   d = dbpool.runQuery(query)
   d.addCallback(convert_json)
   return d
   
 @app.route("/graph_data/motif_depth/<herv_name>")
 def motif_depth(request, herv_name):
+  request.responseHeaders.addRawHeader("Content-Type", 
+                                       "application/json")
   query = 'SELECT T.TF, D.Depth FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Motif_depth AS D WHERE HT.HERV="%(herv_name)s" AND HT.HCREs REGEXP "%(hcre)s" AND T.Project REGEXP "%(db)s" AND HT.%(z_score_mode)s_based_z_score >= %(z_score)s ORDER BY HT.%(z_score_mode)s_based_z_score DESC LIMIT %(limit)s ;'
   params = get_params(request)
   params["herv_name"] = str(herv_name)
-  query = query % params
+  query %= params
   d = dbpool.runQuery(query)
   d.addCallback(convert_json)
   return d
@@ -107,13 +125,15 @@ def dhs_convert_json(l):
   return json.dumps(res)
 @app.route("/graph_data/dhs_depth/<herv_name>")
 def dhs_depth(request, herv_name):
+  request.responseHeaders.addRawHeader("Content-Type", 
+                                       "application/json")
   params = get_params(request)
   if params["representative"]:
     query = 'SELECT DHS_data, Depth FROM DHS_depth WHERE HERV="%(herv_name)s" AND DHS_Data IN ("UwdukeGm12878UniPk","UwdukeH1hescUniPk","UwdukeK562UniPk","UwdukeHepg2UniPk","UwdukeHelas3UniPk","UwdukeHuvecUniPk","UwdukeA549UniPk","UwdukeMcf7UniPk") AND Z_score >= %(z_score)s ORDER BY Z_score DESC LIMIT %(limit)s;'
   else:
     query = 'SELECT DHS_data, Depth FROM DHS_depth WHERE HERV="%(herv_name)s" AND Z_score >= %(z_score)s ORDER BY Z_score DESC LIMIT %(limit)s;'
   params["herv_name"] = herv_name
-  query = query % params
+  query %= params
   d = dbpool.runQuery(query)
   d.addCallback(dhs_convert_json)
   return d
@@ -130,8 +150,10 @@ def chromatin_state_json(l):
   return json.dumps(res)
 @app.route("/graph_data/chromatin_state/<herv_name>")
 def chromatin_state_depth(request, herv_name):
+  request.responseHeaders.addRawHeader("Content-Type", 
+                                       "application/json")
   query = 'SELECT Cell, States FROM Chromatin_state WHERE HERV="%s";'
-  query = query % (str(herv_name),)
+  query %= (str(herv_name),)
   d = dbpool.runQuery(query)
   d.addCallback(chromatin_state_json)
   return d
@@ -153,8 +175,10 @@ def ortholog_map_json(t):
   return json.dumps([res])
 @app.route("/graph_data/ortholog/<herv_name>")
 def ortholog_graph(request, herv_name):
+  request.responseHeaders.addRawHeader("Content-Type", 
+                                       "application/json")
   query = 'SELECT Locus_Ortholog FROM Ortholog_with_phylogeny WHERE HERV="%s";'
-  query = query % (str(herv_name),)
+  query %= (str(herv_name),)
   d = dbpool.runQuery(query)
   d.addCallback(ortholog_map_json)
   return d
@@ -177,11 +201,12 @@ def TFBS_map_json(t):
   return json.dumps([res])
 @app.route("/graph_data/TFBS_phylogeny/<herv_name>")
 def TFBS_phylogeny_graph(request, herv_name):
+  request.responseHeaders.addRawHeader("Content-Type", 
+                                       "application/json")
   query = 'SELECT T.TF, TB.TF_binding FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN TFBS_with_phylogeny AS TB WHERE HT.HERV="%(herv_name)s" AND HT.HCREs REGEXP "%(hcre)s" AND T.Project REGEXP "%(db)s" AND HT.%(z_score_mode)s_based_z_score >= %(z_score)s ORDER BY HT.%(z_score_mode)s_based_z_score DESC LIMIT %(limit)s ;'
   params = get_params(request)
   params["herv_name"] = herv_name
-  query = query % params
-  print query
+  query %= params
   d = dbpool.runQuery(query)
   d.addCallback(TFBS_map_json)
   return d
@@ -204,13 +229,133 @@ def motif_map_json(t):
   return json.dumps([res])
 @app.route("/graph_data/motif_phylogeny/<herv_name>")
 def motif_phylogeny_graph(request, herv_name):
+  request.responseHeaders.addRawHeader("Content-Type", 
+                                       "application/json")
   query = 'SELECT T.TF, M.Motif_Id, Phy.P_value FROM((( Motif_with_phylogeny AS Phy NATURAL JOIN Motif_Id AS M) NATURAL JOIN HCREs_Id AS HC) NATURAL JOIN HERV_TFBS_Id AS HT) NATURAL JOIN TFBS_Id AS T WHERE HT.HERV="%(herv_name)s" AND T.Project REGEXP "%(db)s" AND HT.%(z_score_mode)s_based_z_score >= %(z_score)s ORDER BY HT.%(z_score_mode)s_based_z_score DESC ;'
   params = get_params(request)
   params["herv_name"] = herv_name
-  query = query % params
-  print query
+  query %= params
   d = dbpool.runQuery(query)
   d.addCallback(motif_map_json)
+  return d
+
+def dl_hcre_format(l):
+  res = ["HERV\tTF\tMotif_Id\tMatched_motif\tMotif_source\tStart_position_in_consensus_seq\tEnd_position_in_consensus_seq"]
+  for t in l:
+    res.append("\t".join(str(i) for i in t))
+  return "\n".join(res)
+@app.route("/download/hcre/<herv_name>")
+def dl_hcre(request, herv_name):
+  request.responseHeaders.addRawHeader("Content-Type", 
+                                       "text/tab-separated-values")
+  query = 'SELECT HC.HERV, T.TF, M.Motif_Id, M.Motif_name, M.Motif_origin, M.Start_in_consensus_seq, M.End_in_consensus_seq FROM(Motif_Id AS M NATURAL JOIN HCREs_Id AS HC) NATURAL JOIN TFBS_Id AS T WHERE HC.HERV = "%s";'
+  query %= (str(herv_name), )
+  print query, type(query)
+  d = dbpool.runQuery(query)
+  d.addCallback(dl_hcre_format)
+  return d
+
+
+@app.route("/download/herv_tfbs_position/<herv_name>")
+def dl_herv_tfbs_position(request, herv_name):
+  request.responseHeaders.addRawHeader("Content-Type", 
+                                      "text/tab-separated-values")
+  params = get_params(request)
+  if params["tf"] == "all":
+    tf_query = ";"
+  else:
+    tf_query = ' AND T.TF = "%s";' % (params["tf"],)
+
+  if params["merge_cell_types"]:
+    print "merge true"
+    query = 'SELECT HT.HERV, T.TF, P.Chrom, P.Start, P.End, P.Locus FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Position_HERV_TFBS_Merged AS P WHERE HT.HERV = "%s"' + tf_query
+  else:
+    print "merge_false"
+    query = 'SELECT HT.HERV, T.TF, P.Chrom, P.Start, P.End, P.Locus, D.Cell_name, D.Note, D.File_name FROM((HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Position_HERV_TFBS_in_each_cell AS P) NATURAL JOIN Dataset AS D WHERE HT.HERV = "%s"' + tf_query
+
+  query %= (str(herv_name),)
+  d = dbpool.runQuery(query)
+  def dl_herv_tfbs_position_format(l):
+    if params["merge_cell_types"]:
+      res = ["HERV\tTF\tChrom\tStart\tEnd\tHERV_locus"]
+    else:
+      res = ["HERV\tTF\tChrom\tStart\tEnd\tHERV_locus\tCell\tNote\tTFBSs_source"]
+    for t in l:
+      res.append("\t".join(str(i) for i in t))
+    return "\n".join(res)
+  d.addCallback(dl_herv_tfbs_position_format)
+  return d
+
+@app.route("/download/hcre_position/<herv_name>")
+def dl_hcre_position(request, herv_name):
+  request.responseHeaders.addRawHeader("Content-Type", 
+                                      "text/tab-separated-values")
+  params = get_params(request)
+  if params["tf"] == "all":
+    tf_query = ";"
+  else:
+    tf_query = ' AND T.TF = "%s";' % (params["tf"],)
+
+  if params["merge_cell_types"]:
+    query = 'SELECT HT.HERV, T.TF, P.Chrom, P.Start, P.End, P.Locus, P.Motif_Id, P.Motif_strand, P.Motif_pval, P.Match_sequence FROM((HCREs_Id AS HC NATURAL JOIN HERV_TFBS_Id AS HT) NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Position_HCREs AS P WHERE HT.HERV = "%s"' + tf_query
+  else:
+    query = 'SELECT HT.HERV, T.TF, P.Chrom, P.Start, P.End, P.Locus, P.Motif_Id, P.Motif_strand, P.Motif_pval, P.Match_sequence, D.Cell_name, D.Note, D.File_name FROM((((HCREs_Id AS HC NATURAL JOIN HERV_TFBS_Id AS HT) NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Position_HCREs AS P) NATURAL JOIN Mapping_HCREs_Dataset AS MP) NATURAL JOIN Dataset AS D WHERE HT.HERV = "%s"' + tf_query
+
+  query %= (str(herv_name),)
+  d = dbpool.runQuery(query)
+  def dl_hcre_position_format(l):
+    if params["merge_cell_types"]:
+      res = ["HERV\tTF\tChrom\tStart\tEnd\tHERV_locus\tMotif_Id\tMotif_strand\tMotif_P-value\tMatched_Sequence"]
+    else:
+      res = ["HERV\tTF\tChrom\tStart\tEnd\tHERV_locus\tMotif_Id\tMotif_strand\tMotif_P-value\tMatched_Sequence\tCell\tNote\tTFBSs_source"]
+    for t in l:
+      res.append("\t".join(str(i) for i in t))
+    return "\n".join(res)
+  d.addCallback(dl_hcre_format)
+  return d
+
+@app.route("/download/dhs_position/<herv_name>")
+def dl_dhs_position(request, herv_name):
+  request.responseHeaders.addRawHeader("Content-Type", 
+                                       "text/tab-separated-values")
+  query = 'SELECT P.HERV, P.Cell_name, P.Chrom, P.Start, P.End, P.Locus FROM Position_HERV_DHS AS P WHERE P.HERV = "%s";'
+  query %= (str(herv_name),)
+  d = dbpool.runQuery(query)
+  def dl_dhs_position_format(l):
+    res = ["HERV\tCell\tChrom\tStart\tEnd\tHERV_locus"]
+    for t in l:
+      res.append("\t".join(str(i) for i in t))
+    return "\n".join(res)
+  d.addCallback(dl_dhs_position_format)
+  return d
+
+
+@app.route("/tf_list/<herv_name>")
+def tf_list(request, herv_name):
+  request.responseHeaders.addRawHeader("Content-Type",
+                                       "application/json")
+  query = 'SELECT T.TF FROM HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T WHERE HT.HERV="%(herv_name)s" AND HT.HCREs="%(hcre)s" AND T.Project REGEXP "%(db)s" AND HT.%(z_score_mode)s_based_z_score >= %(z_score)s ORDER BY HT.%(z_score_mode)s_based_z_score DESC LIMIT %(limit)s ;'
+  params = get_params(request)
+  params["herv_name"] = str(herv_name)
+  query %= params
+  print query
+  d = dbpool.runQuery(query)
+  d.addCallback(lambda l: json.dumps([t[0] for t in l]))
+  return d
+
+@app.route("/dhs_celltype_list/<herv_name>")
+def dhs_celltype_list(request, herv_name):
+  request.responseHeaders.addRawHeader("Content-Type",
+                                      "application/json")
+  params = get_params(request)
+  if params["representative"]:
+    query = 'SELECT DHS_data FROM DHS_depth WHERE HERV="%(herv_name)s" AND DHS_Data IN ("UwdukeGm12878UniPk","UwdukeH1hescUniPk","UwdukeK562UniPk","UwdukeHepg2UniPk","UwdukeHelas3UniPk","UwdukeHuvecUniPk","UwdukeA549UniPk","UwdukeMcf7UniPk") AND Z_score >= %(z_score)s ORDER BY Z_score DESC LIMIT %(limit)s;'
+  else:
+    query = 'SELECT DHS_data FROM DHS_depth WHERE HERV="%(herv_name)s" AND Z_score >= %(z_score)s ORDER BY Z_score DESC LIMIT %(limit)s;'
+  params["herv_name"] = str(herv_name)
+  query %= params
+  d = dbpool.runQuery(query)
+  d.addCallback(lambda l: json.dumps([t[0].replace("UniPk","") for t in l]))
   return d
 
 app.run("ilabws03.lab.nig.ac.jp", 8080)

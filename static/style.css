@@ -19,6 +19,10 @@ div#left ul { list-style-type: none; }
 div#left li:hover { cursor: hand;
                     background-color: yellow; }
 
-form#z_score_mode { margin-bottom: 0px }
+form#z_score_mode { margin-bottom: 0px; }
 
 div#right { overflow: auto; }
+
+div#text_body { display: none; }
+
+.herv_name { color: #2724ce; }
