@@ -213,7 +213,7 @@ def TFBS_phylogeny_graph(request, herv_name):
 
 def motif_map_json(t):
   res = { "type": "heatmap",
-          "colorscale": [[0, "white"], [1,"black"]],
+          "colorscale": [[0, "black"], [1, "white"]],
           "showscale": False }
   n_x = len(t)
   if n_x == 0:
@@ -334,7 +334,7 @@ def dl_dhs_position(request, herv_name):
 def tf_list(request, herv_name):
   request.responseHeaders.addRawHeader("Content-Type",
                                        "application/json")
-  query = 'SELECT T.TF FROM HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T WHERE HT.HERV="%(herv_name)s" AND HT.HCREs="%(hcre)s" AND T.Project REGEXP "%(db)s" AND HT.%(z_score_mode)s_based_z_score >= %(z_score)s ORDER BY HT.%(z_score_mode)s_based_z_score DESC LIMIT %(limit)s ;'
+  query = 'SELECT T.TF FROM HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T WHERE HT.HERV="%(herv_name)s" AND HT.HCREs REGEXP "%(hcre)s" AND T.Project REGEXP "%(db)s" AND HT.%(z_score_mode)s_based_z_score >= %(z_score)s ORDER BY HT.%(z_score_mode)s_based_z_score DESC LIMIT %(limit)s ;'
   params = get_params(request)
   params["herv_name"] = str(herv_name)
   query %= params

@@ -1,7 +1,11 @@
-div#wrap { height: 95vh;
+body { background-color: beige; }
+
+div#wrap { margin: auto;
+           height: 95vh;
            width: 95vw;
            display: flex;
            flex-direction: column; }
+
 
 div#contents { display: flex;
                flex-direction: row; }
@@ -14,15 +18,19 @@ div#left { display: flex;
 div#herv_menu { width: 300px;
                 overflow: auto;}
 
-div#left ul { list-style-type: none; }
+div#left ul { padding-left: 10px;
+              background-color: darkseagreen;
+              list-style-type: none; }
 
 div#left li:hover { cursor: hand;
                     background-color: yellow; }
 
 form#z_score_mode { margin-bottom: 0px; }
 
-div#right { overflow: auto; }
+div#right { padding-left: 10px; 
+            overflow: auto; }
 
 div#text_body { display: none; }
+
 
 .herv_name { color: #2724ce; }

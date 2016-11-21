@@ -1,3 +1,5 @@
+var graph_bgcolor = "beige";
+
 function Graphs(graphs) {
   this.graphs = graphs;
 }
@@ -64,7 +66,9 @@ function herv_list(div, graphs) {
         if (event.target.tagName == "LI") {
           var params = get_params();
           for (var i=0; i<event.target.parentNode.children.length; i++) { 
-            event.target.parentNode.children[i].style.backgroundColor = "white";
+            var color = event.target.parentNode.backgroundColor;
+            var child = event.target.parentNode.children[i];
+            child.style.backgroundColor = color;
           }
           event.target.style.backgroundColor = "cyan";
           graphs.current_herv_name = event.target.id;
@@ -118,7 +122,8 @@ function tfbs_depth_graph(herv_name, params, div) {
       var data = JSON.parse(this.responseText);
       var layout = { title: "TFBS Depth",
                      xaxis: { title: "Position (nt)" },
-                     yaxis: { title: "HERV-TFBSs (copy)" }};
+                     yaxis: { title: "HERV-TFBSs (copy)" },
+                     paper_bgcolor: graph_bgcolor};
       Plotly.newPlot(div, data, layout);
     }
   }
@@ -134,7 +139,8 @@ function motif_depth_graph(herv_name, params, div) {
       var data = JSON.parse(this.responseText);
       var layout = { title: "Motif Depth",
                      xaxis: { title: "Position (nt)" },
-                     yaxis: { title: "TF motif in HERV-TFBSs (copy)" }};
+                     yaxis: { title: "TF motif in HERV-TFBSs (copy)" },
+                     paper_bgcolor: graph_bgcolor};
       Plotly.newPlot(div, data, layout);
     }
   }
@@ -150,7 +156,8 @@ function dhs_depth_graph(herv_name, params, div) {
       var data = JSON.parse(this.responseText);
       var layout = { title: "DHS Depth",
                      xaxis: { title: "Position (nt)" },
-                     yaxis: { title: "HERV-DHSs (copy)" }};
+                     yaxis: { title: "HERV-DHSs (copy)" },
+                     paper_bgcolor: graph_bgcolor};
       Plotly.newPlot(div, data, layout);
     }
   }
@@ -165,7 +172,8 @@ function chromatin_state_graph(herv_name, params, div) {
       var data = JSON.parse(this.responseText);
       var layout = { title: "Chromatin State",
                      xaxis: { title: "" },
-                     yaxis: { title: "Proportion" }};
+                     yaxis: { title: "Proportion" },
+                     paper_bgcolor: graph_bgcolor};
       Plotly.newPlot(div, data, layout);
     }
   }
@@ -192,7 +200,8 @@ function heatmap_graph(herv_name, params, div) {
                      xaxis: { title: "" },
                      yaxis: { title: "Locus",
                               ticks: "",
-                              showticklabels: false }};
+                              showticklabels: false },
+                     paper_bgcolor: graph_bgcolor};
       Plotly.newPlot(ortholog_div, data, layout);
     }
   }
@@ -209,7 +218,8 @@ function heatmap_graph(herv_name, params, div) {
                      xaxis: { title: "" },
                      yaxis: { title: "Locus",
                               ticks: "",
-                              showticklabels: false }};
+                              showticklabels: false },
+                     paper_bgcolor: graph_bgcolor};
       Plotly.newPlot(TFBS_div, data, layout);
     }
   }
@@ -226,7 +236,8 @@ function heatmap_graph(herv_name, params, div) {
                      xaxis: { title: "" },
                      yaxis: { title: "Locus",
                               ticks: "",
-                              showticklabels: false }};
+                              showticklabels: false },
+                     paper_bgcolor: graph_bgcolor};
       Plotly.newPlot(motif_div, data, layout);
     }
   }
