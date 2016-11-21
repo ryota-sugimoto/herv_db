@@ -60,13 +60,13 @@ function herv_list(div, graphs) {
                hervs[i].name + '</li>';
       }
       var ul = document.createElement("ul");
+      var color = ul.style.backgroundColor;
       ul.setAttribute("id", "herv_list");
       ul.innerHTML = out;
       function herv_list_onclick(event) {
         if (event.target.tagName == "LI") {
           var params = get_params();
           for (var i=0; i<event.target.parentNode.children.length; i++) { 
-            var color = event.target.parentNode.backgroundColor;
             var child = event.target.parentNode.children[i];
             child.style.backgroundColor = color;
           }
@@ -277,11 +277,11 @@ function set_select_options(herv_name, params) {
          var merged = "";
       }
       var a1 = document.getElementById(tf_select_1.getAttribute("anchor_id"));
-      a1.href = "/download/herv_tfbs_position/"+herv_name+"?tf=all;merge_cell_types="+merge+";";
-      a1.download = herv_name + "_all_tfbs" + merged + ".tsv";
+      a1.setAttribute("href", "/download/herv_tfbs_position/"+herv_name+"?tf=all;merge_cell_types="+merge+";");
+      a1.setAttribute("download", herv_name + "_all_tfbs" + merged + ".tsv");
       var a2 = document.getElementById(tf_select_2.getAttribute("anchor_id"));
-      a2.href = "/download/hcre_position/"+herv_name+"?tf=all;merge_cell_types="+merge+";";
-      a2.download = herv_name + "_all_hcre" + merged + ".tsv";
+      a2.setAttribute("href", "/download/hcre_position/"+herv_name+"?tf=all;merge_cell_types="+merge+";");
+      a2.setAttribute("download", herv_name + "_all_hcre" + merged + ".tsv");
      function tf_select_1_change(event) {
         var tf = event.target.value;
         var anchor = document.getElementById(event.target.getAttribute("anchor_id"));
