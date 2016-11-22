@@ -184,11 +184,16 @@ function heatmap_graph(herv_name, params, div) {
   var args = create_args_for_tfbs(params);
   div.style.display = "flex";
   div.style.flexDirection = "row";
-  //div.style.overflow = "scroll";
+  div.style.overflow = "scroll";
 
   while (div.firstChild) {
     div.removeChild(div.firstChild);
   }
+
+  var tree_img = document.createElement("img");
+  div.appendChild(tree_img);
+  tree_img.setAttribute("src", "/image/tree/"+herv_name);
+
   var ortholog_div = document.createElement("div");
   div.appendChild(ortholog_div);
   var ortholog_request = new XMLHttpRequest();

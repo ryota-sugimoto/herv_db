@@ -239,6 +239,16 @@ def motif_phylogeny_graph(request, herv_name):
   d.addCallback(motif_map_json)
   return d
 
+@app.route("/image/tree/<herv_name>")
+def tree_image(request, herv_name):
+  request.responseHeaders.addRawHeader("Content-Type",
+                                       "image/png")
+  query = 'SELECT * FROM Tree_image WHERE HERV="%s";'
+  query %= herv_name
+  d = dbpool.runQuery(query)
+  d.addCallback(lambda l: str(l[0][1]))
+  return d
+
 def dl_hcre_format(l):
   res = ["HERV\tTF\tMotif_Id\tMatched_motif\tMotif_source\tStart_position_in_consensus_seq\tEnd_position_in_consensus_seq"]
   for t in l:
