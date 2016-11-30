@@ -268,10 +268,10 @@ function set_select_options(herv_name, params) {
       for (var i=0; i<tf_list.length; i++) {
         var option_1 = document.createElement("option");
         var option_2 = document.createElement("option");
-        option_1.value = tf_list[i]
-        option_2.value = tf_list[i]
-        option_1.innerHTML = tf_list[i]
-        option_2.innerHTML = tf_list[i]
+        option_1.value = tf_list[i];
+        option_2.value = tf_list[i];
+        option_1.innerHTML = tf_list[i];
+        option_2.innerHTML = tf_list[i];
         tf_select_1.append(option_1);
         tf_select_2.append(option_2);
       }
