@@ -339,6 +339,30 @@ def dl_dhs_position(request, herv_name):
   d.addCallback(dl_dhs_position_format)
   return d
 
+@app.route("/download/ontology/<herv_name>")
+def dl_ontology(request, herv_name):
+  request.responseHeaders.addRawHeader("Content-Type",
+                                      "text/tab-separated-values")
+  params = get_params(request)
+  if params["tf"] != "all":
+    if params["merge_cell_types"]:
+      header = "HERV\tTF\tGO_Id\tDescription\tP_value\tFDR\tFER\tFold_enrichment\tHit_number\tHit_gene_number\tHit_genes"
+      query = 'SELECT GO.HERV, T.TF, GO.GO_Id, GO.GO_description, GO.P_value, GO.FDR, GO.FER, GO.Fold_enrichment, GO.Hit_num, GO.Hit_gene_num, GO.HIT_genes FROM HCREs_GO_Merge AS GO NATURAL JOIN TFBS_Id AS T WHERE GO.HERV = "%s" AND T.TF = "%s" ;'
+    else:
+      header = "HERV\tTF\tCell\tGO_Id\tDescription\tP_value\tFDR\tFER\tFold_enrichment\tNumber_of_hit_HCREs\tNumber_of_hit_genes\tHit_genes"
+      query = 'SELECT GO.HERV, T.TF, GO.Cell_name, GO.GO_Id, GO.GO_description, GO.P_value, GO.FDR, GO.FER, GO.Fold_enrichment, GO.Hit_num, GO.Hit_gene_num, GO.HIT_genes FROM HCREs_GO_Each AS GO NATURAL JOIN TFBS_Id AS T WHERE GO.HERV = "%s" AND T.TF = "%s" ;'
+    query %= (str(herv_name), params["tf"])
+  else:
+    if params["merge_cell_types"]:
+      header = "HERV\tTF\tGO_Id\tDescription\tP_value\tFDR\tFER\tFold_enrichment\tHit_number\tHit_gene_number\tHit_genes"
+      query = 'SELECT GO.HERV, T.TF, GO.GO_Id, GO.GO_description, GO.P_value, GO.FDR, GO.FER, GO.Fold_enrichment, GO.Hit_num, GO.Hit_gene_num, GO.HIT_genes FROM HCREs_GO_Merge AS GO NATURAL JOIN TFBS_Id AS T WHERE GO.HERV = "%s" ;'
+    else:
+      header = "HERV\tTF\tCell\tGO_Id\tDescription\tP_value\tFDR\tFER\tFold_enrichment\tNumber_of_hit_HCREs\tNumber_of_hit_genes\tHit_genes"
+      query = 'SELECT GO.HERV, T.TF, GO.Cell_name, GO.GO_Id, GO.GO_description, GO.P_value, GO.FDR, GO.FER, GO.Fold_enrichment, GO.Hit_num, GO.Hit_gene_num, GO.HIT_genes FROM HCREs_GO_Each AS GO NATURAL JOIN TFBS_Id AS T WHERE GO.HERV = "%s" ;'
+    query %= (str(herv_name),)
+  d = dbpool.runQuery(query)
+  d.addCallback(lambda l: "\n".join([header]+["\t".join(map(str,t)) for t in l]))
+  return d
 
 @app.route("/tf_list/<herv_name>")
 def tf_list(request, herv_name):
@@ -366,6 +390,21 @@ def dhs_celltype_list(request, herv_name):
   query %= params
   d = dbpool.runQuery(query)
   d.addCallback(lambda l: json.dumps([t[0].replace("UniPk","") for t in l]))
+  return d
+
+@app.route("/info/<herv_name>")
+def herv_info(request, herv_name):
+  request.responseHeaders.addRawHeader("Content-Type",
+                                      "application/json")
+  query = 'SELECT HERV, Family, Copy_number, Integration_date FROM HERVs WHERE HERV = "%s" ;'
+  query %= (str(herv_name),)
+  d = dbpool.runQuery(query)
+  def f(l):
+    return json.dumps({ "herv": l[0][0],
+                         "family": l[0][1],
+                         "copy_number": l[0][2],
+                         "integration_data": l[0][3]})
+  d.addCallback(f)
   return d
 
 app.run("ilabws03.lab.nig.ac.jp", 8080)

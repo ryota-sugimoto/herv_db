@@ -75,6 +75,7 @@ function herv_list(div, graphs) {
           graphs.draw(event.target.id, params);
           
           set_select_options(event.target.id, params);
+          #TODO info function comes here
         }
       }
       ul.addEventListener("click", herv_list_onclick, false);
