@@ -48,52 +48,74 @@ function get_params() {
   return res
 }
 
-function herv_list(div, graphs) {
+function update_herv_list(graphs) {
+  var div = document.getElementById("herv_menu");
+  while (div.firstChild) {
+    div.removeChild(div.firstChild);
+  }
+  var params = get_params();
+  var args = create_args_for_tfbs(params);
   var request = new XMLHttpRequest();
-  request.open("GET", "static/herv_list.json", true);
+  request.open("GET", "/herv_list" + args, true);
   request.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       var hervs = JSON.parse(this.responseText);
-      var out = "";
-      for (var i=0; i < hervs.length; i++) {
-        out += '<li id="' + hervs[i].id + '">' +
-               hervs[i].name + '</li>';
-      }
       var ul = document.createElement("ul");
-      var color = ul.style.backgroundColor;
       ul.setAttribute("id", "herv_list");
-      ul.innerHTML = out;
       function herv_list_onclick(event) {
-        if (event.target.tagName == "LI") {
-          var params = get_params();
-          for (var i=0; i<event.target.parentNode.children.length; i++) { 
-            var child = event.target.parentNode.children[i];
+        if (event.currentTarget.tagName == "LI") {
+          var li = event.currentTarget
+          for (var i=0; i<li.parentNode.children.length; i++) {
+            var child = li.parentNode.children[i];
             child.style.backgroundColor = color;
           }
-          event.target.style.backgroundColor = "cyan";
-          graphs.current_herv_name = event.target.id;
-          graphs.draw(event.target.id, params);
-          
-          set_select_options(event.target.id, params);
-          #TODO info function comes here
+          li.style.backgroundColor = "cyan";
+          var herv_name = li.id;
+          graphs.current_herv_name = herv_name;
+          graphs.draw(herv_name, params);
+
+          set_select_options(herv_name, params);
+          //TODO info function comes here
         }
       }
-      ul.addEventListener("click", herv_list_onclick, false);
+      for (var i=0; i < hervs.length; i++) {
+        var herv_name = hervs[i]["herv_name"];
+        var n = hervs[i]["n"];
+        var li = document.createElement("LI");
+        li.setAttribute("id", herv_name);
+        li.style.display = "flex";
+        li.style.flexDirection = "row";
+        var herv_name_div = document.createElement("DIV");
+        herv_name_div.innerHTML = herv_name;
+        herv_name_div.style.width = "200px";
+        var n_div = document.createElement("DIV");
+        n_div.innerHTML = n;
+        li.appendChild(herv_name_div);
+        li.appendChild(n_div);
+        if (graphs.current_herv_name == li.id) {
+          li.style.backgroundColor = "cyan";
+        }
+        li.addEventListener("click", herv_list_onclick, false);
+        ul.appendChild(li);
+      }
+      var color = ul.style.backgroundColor;
       div.appendChild(ul);
-     
-      var param_div = document.getElementById("param_box")
-      function param_change(event) {
-        var params = get_params();
-        if (graphs.current_herv_name) {
-          graphs.draw(graphs.current_herv_name, params);
-          
-          set_select_options(graphs.current_herv_name, params);
-        }
-      }
-      param_div.addEventListener("change", param_change, false);
     }
   }
   request.send();
+}
+
+function set_params_event(graphs) {
+  var param_div = document.getElementById("param_box")
+  function param_change(event) {
+    update_herv_list(graphs);
+    var params = get_params();
+    if (graphs.current_herv_name) {
+      graphs.draw(graphs.current_herv_name, params);
+      set_select_options(graphs.current_herv_name, params);
+    }
+  }
+  param_div.addEventListener("change", param_change, false);
 }
 
 
@@ -137,12 +159,20 @@ function motif_depth_graph(herv_name, params, div) {
   request.open("GET", "graph_data/motif_depth/"+herv_name+args, true)
   request.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-      var data = JSON.parse(this.responseText);
-      var layout = { title: "Motif Depth",
-                     xaxis: { title: "Position (nt)" },
-                     yaxis: { title: "TF motif in HERV-TFBSs (copy)" },
-                     paper_bgcolor: graph_bgcolor};
-      Plotly.newPlot(div, data, layout);
+      var line_data = JSON.parse(this.responseText);
+      var request_dot = new XMLHttpRequest();
+      request_dot.open("GET", "graph_data/motif_depth_dot/"+herv_name+args, true);
+      request_dot.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          var dot_data = JSON.parse(this.responseText);
+          var layout = { title: "Motif Depth",
+                         xaxis: { title: "Position (nt)" },
+                         yaxis: { title: "TF motif in HERV-TFBSs (copy)" },
+                         paper_bgcolor: graph_bgcolor};
+          Plotly.newPlot(div, line_data.concat(dot_data), layout);
+        }
+      }
+      request_dot.send();
     }
   }
   request.send();
@@ -253,11 +283,15 @@ function heatmap_graph(herv_name, params, div) {
 function set_select_options(herv_name, params) {
   var tf_select_1 = document.getElementById("tf_select_1");
   var tf_select_2 = document.getElementById("tf_select_2");
+  var tf_select_3 = document.getElementById("tf_select_3");
   while (tf_select_1.length > 1) {
     tf_select_1.removeChild(tf_select_1.lastChild);
   }
   while (tf_select_2.length > 1) {
     tf_select_2.removeChild(tf_select_2.lastChild);
+  }
+  while (tf_select_3.length > 1) {
+    tf_select_3.removeChild(tf_select_3.lastChild);
   }
   var args = create_args_for_tfbs(params)
   var request = new XMLHttpRequest();
@@ -268,12 +302,16 @@ function set_select_options(herv_name, params) {
       for (var i=0; i<tf_list.length; i++) {
         var option_1 = document.createElement("option");
         var option_2 = document.createElement("option");
+        var option_3 = document.createElement("option");
         option_1.value = tf_list[i];
         option_2.value = tf_list[i];
+        option_3.value = tf_list[i];
         option_1.innerHTML = tf_list[i];
         option_2.innerHTML = tf_list[i];
+        option_3.innerHTML = tf_list[i];
         tf_select_1.append(option_1);
         tf_select_2.append(option_2);
+        tf_select_3.append(option_3);
       }
       if (params["merge_cell_types"]) {
          var merge = "true";
@@ -288,7 +326,11 @@ function set_select_options(herv_name, params) {
       var a2 = document.getElementById(tf_select_2.getAttribute("anchor_id"));
       a2.setAttribute("href", "/download/hcre_position/"+herv_name+"?tf=all;merge_cell_types="+merge+";");
       a2.setAttribute("download", herv_name + "_all_hcre" + merged + ".tsv");
-     function tf_select_1_change(event) {
+      var a3 = document.getElementById(tf_select_3.getAttribute("anchor_id"));
+      a3.setAttribute("href", "/download/ontology/"+herv_name+"?tf=all;merge_cell_types="+merge+";");
+      a3.setAttribute("download", herv_name + "all_ontology" + merged + ".tsv");
+
+      function tf_select_1_change(event) {
         var tf = event.target.value;
         var anchor = document.getElementById(event.target.getAttribute("anchor_id"));
         anchor.setAttribute("href",
@@ -306,6 +348,15 @@ function set_select_options(herv_name, params) {
                             herv_name + "_" + tf + "_hcre" + merged + ".tsv");
       }
       tf_select_2.addEventListener("change", tf_select_2_change, false);
+      function tf_select_3_change(event) {
+        var tf = event.target.value;
+        var anchor = document.getElementById(event.target.getAttribute("anchor_id"));
+        anchor.setAttribute("href",
+                            "/download/ontology/"+herv_name+"?tf="+tf+";merge_cell_types="+merge+";");
+        anchor.setAttribute("download",
+                            herv_name + "_" + tf + "_ontology" + merged + ".tsv");
+      }
+      tf_select_3.addEventListener("change", tf_select_3_change, false);
     }
   }
   request.send();
@@ -325,7 +376,5 @@ var graphs = new Graphs([{id: "tfbs_depth_graph", draw: tfbs_depth_graph},
                          {id: "chromatin_state_graph",
                           draw: chromatin_state_graph},
                          {id: "heat_maps", draw: heatmap_graph}]);
-var herv_menu_div = document.getElementById("herv_menu");
-var herv_list_div = document.createElement("div");
-herv_menu_div.appendChild(herv_list_div);
-herv_list(herv_list_div, graphs);
+update_herv_list(graphs);
+set_params_event(graphs);

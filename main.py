@@ -3,6 +3,7 @@
 
 from twisted.web.static import File
 from twisted.enterprise import adbapi
+from natsort import natsorted
 from klein import Klein
 import json
 
@@ -114,6 +115,29 @@ def motif_depth(request, herv_name):
   d.addCallback(convert_json)
   return d
 
+@app.route("/graph_data/motif_depth_dot/<herv_name>")
+def motif_depth_dot(request, herv_name):
+  request.responseHeaders.addRawHeader("Content-Type",
+                                       "application/json")
+  query = 'SELECT SQ.HERV, SQ.TF, M.Motif_Id, M.Start_in_consensus_seq, M.End_in_consensus_seq, SQ.Depth FROM Motif_Id AS M NATURAL JOIN (HCREs_Id AS HC NATURAL JOIN (SELECT * FROM((HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN TFBS_depth AS D) WHERE HT.HERV="%(herv_name)s" AND HT.HCREs REGEXP "%(hcre)s" AND T.Project REGEXP "%(db)s" AND HT.%(z_score_mode)s_based_z_score >= %(z_score)s ORDER BY HT.%(z_score_mode)s_based_z_score DESC LIMIT %(limit)s) AS SQ);'
+  params = get_params(request)
+  params["herv_name"] = str(herv_name)
+  query %= params
+  d = dbpool.runQuery(query)
+  def f(l):
+    res = []
+    for t in l:
+      d = {}
+      start,end = int(t[3]), int(t[4])
+      d["x"] = [int((start + end)/2.0)]
+      d["y"] = [int(max(t[5].split(",")[start:end]))]
+      d["mode"] = "markers"
+      d["name"] = t[1]
+      res.append(d)
+    return json.dumps(res)
+  d.addCallback(f)
+  return d
+
 def dhs_convert_json(l):
   res = []
   for t in l:
@@ -213,7 +237,9 @@ def TFBS_phylogeny_graph(request, herv_name):
 
 def motif_map_json(t):
   res = { "type": "heatmap",
-          "colorscale": [[0, "black"], [1, "white"]],
+          "colorscale": [[0, "black"], [10**(-4)-10**(-10), "black"],
+                         [10**(-4),"grey"], [10**(-3),"grey"],
+                         [10**(-3)+10**(-10), "white"], [1, "white"]],
           "showscale": False }
   n_x = len(t)
   if n_x == 0:
@@ -226,6 +252,14 @@ def motif_map_json(t):
     zz = map(float, zz.split(","))
     for iy,z in enumerate(zz):
       res["z"][iy][ix] = z
+      '''
+      if z < 10**(-3)and z > 10**(-4):
+        res["z"][iy][ix] = 0.5
+      elif z <= 10**-4:
+        res["z"][iy][ix] = 0
+      else:
+        res["z"][iy][ix] = 1
+      '''
   return json.dumps([res])
 @app.route("/graph_data/motif_phylogeny/<herv_name>")
 def motif_phylogeny_graph(request, herv_name):
@@ -246,7 +280,7 @@ def tree_image(request, herv_name):
   query = 'SELECT * FROM Tree_image WHERE HERV="%s";'
   query %= herv_name
   d = dbpool.runQuery(query)
-  d.addCallback(lambda l: str(l[0][1]))
+  d.addCallback(lambda l: str(l[0][1]) if l else "")
   return d
 
 def dl_hcre_format(l):
@@ -401,9 +435,29 @@ def herv_info(request, herv_name):
   d = dbpool.runQuery(query)
   def f(l):
     return json.dumps({ "herv": l[0][0],
-                         "family": l[0][1],
-                         "copy_number": l[0][2],
-                         "integration_data": l[0][3]})
+                        "family": l[0][1],
+                        "copy_number": l[0][2],
+                        "integration_data": l[0][3]})
+  d.addCallback(f)
+  return d
+
+@app.route("/herv_list")
+def herv_list(request):
+  request.responseHeaders.addRawHeader("Content-Type",
+                                       "application/json")
+  params = get_params(request)
+  query = 'SELECT HT.HERV, count(HT.HERV) FROM HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T WHERE HT.HCREs="%(hcre)s" AND T.Project REGEXP "%(db)s" AND HT.%(z_score_mode)s_based_Z_score >= %(z_score)s GROUP BY HT.HERV ;'
+  query %= params
+  d = dbpool.runQuery(query)
+  def f(l):
+    res = []
+    for t in l:
+      d = {}
+      d["herv_name"] = t[0]
+      d["n"] = t[1]
+      res.append(d)
+    res = natsorted(res, key=lambda d: d["herv_name"])
+    return json.dumps(res)
   d.addCallback(f)
   return d
 
