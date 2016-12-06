@@ -76,6 +76,17 @@ function update_herv_list(graphs) {
 
           set_select_options(herv_name, params);
           //TODO info function comes here
+          var request_info = new XMLHttpRequest();
+          request_info.open("GET", "/info/"+herv_name, true);
+          request_info.onreadystatechange = function(){
+            if (this.readyState == 4 && this.status == 200){
+              var json = JSON.parse(this.responseText);
+              document.getElementById("herv_family").innerHTML = json["family"];
+              document.getElementById("copy_number").innerHTML = json["copy_number"];
+              document.getElementById("integration_date").innerHTML = json["integration_data"];
+            }
+          }
+          request_info.send();
         }
       }
       for (var i=0; i < hervs.length; i++) {
@@ -168,7 +179,10 @@ function motif_depth_graph(herv_name, params, div) {
           var layout = { title: "Motif Depth",
                          xaxis: { title: "Position (nt)" },
                          yaxis: { title: "TF motif in HERV-TFBSs (copy)" },
-                         paper_bgcolor: graph_bgcolor};
+                         paper_bgcolor: graph_bgcolor,
+                         showlegend: true,
+                         hovermode: "closest",
+                         hoverinfo: "y+name"};
           Plotly.newPlot(div, line_data.concat(dot_data), layout);
         }
       }
@@ -211,70 +225,85 @@ function chromatin_state_graph(herv_name, params, div) {
   request.send();
 }
 
-function heatmap_graph(herv_name, params, div) {
-  var args = create_args_for_tfbs(params);
-  div.style.display = "flex";
-  div.style.flexDirection = "row";
-  div.style.overflow = "scroll";
-
+function tree_graph(herv_name, params, div) {
   while (div.firstChild) {
     div.removeChild(div.firstChild);
   }
-
   var tree_img = document.createElement("img");
   div.appendChild(tree_img);
   tree_img.setAttribute("src", "/image/tree/"+herv_name);
+}
 
-  var ortholog_div = document.createElement("div");
-  div.appendChild(ortholog_div);
+function ortholog_graph(herv_name, params, div) {
+  var args = create_args_for_tfbs(params);
+  while (div.firstChild) {
+    div.removeChild(div.firstChild);
+  }
   var ortholog_request = new XMLHttpRequest();
   ortholog_request.open("GET", "graph_data/ortholog/"+herv_name+args, true)
   ortholog_request.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       var data = JSON.parse(this.responseText);
-      var layout = { title: "Ortholog",
-                     xaxis: { title: "" },
-                     yaxis: { title: "Locus",
+      var layout = { xaxis: { title: "" },
+                     yaxis: { title: "",
                               ticks: "",
                               showticklabels: false },
-                     paper_bgcolor: graph_bgcolor};
-      Plotly.newPlot(ortholog_div, data, layout);
+                     paper_bgcolor: graph_bgcolor,
+                     autosize: false,
+                     width: 500,
+                     height: 590,
+                     margin: {l:10,r:80,t:15,b:168}};
+      Plotly.newPlot(div, data, layout);
     }
   }
   ortholog_request.send();
+}
 
-  var TFBS_div = document.createElement("div");
-  div.appendChild(TFBS_div);
+function tfbs_phylo_graph(herv_name, params, div) {
+  var args = create_args_for_tfbs(params);
+  while (div.firstChild) {
+    div.removeChild(div.firstChild);
+  }
   var TFBS_request = new XMLHttpRequest();
   TFBS_request.open("GET", "graph_data/TFBS_phylogeny/"+herv_name+args, true)
   TFBS_request.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       var data = JSON.parse(this.responseText);
-      var layout = { title: "TFBS phylogeny",
-                     xaxis: { title: "" },
-                     yaxis: { title: "Locus",
+      var layout = { xaxis: { title: "" },
+                     yaxis: { title: "",
                               ticks: "",
                               showticklabels: false },
-                     paper_bgcolor: graph_bgcolor};
-      Plotly.newPlot(TFBS_div, data, layout);
+                     paper_bgcolor: graph_bgcolor,
+                     autosize: false,
+                     width: 500,
+                     height: 590,
+                     margin: {l:10,r:80,t:15,b:168}};
+      Plotly.newPlot(div, data, layout);
     }
   }
   TFBS_request.send();
+}
 
-  var motif_div = document.createElement("div");
-  div.appendChild(motif_div);
+function motif_phylo_graph(herv_name, params, div) {
+  var args = create_args_for_tfbs(params);
+  while (div.firstChild) {
+    div.removeChild(div.firstChild);
+  }
   var motif_request = new XMLHttpRequest();
   motif_request.open("GET", "graph_data/motif_phylogeny/"+herv_name+args, true);
   motif_request.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       var data = JSON.parse(this.responseText);
-      var layout = { title: "motif phylogeny",
-                     xaxis: { title: "" },
-                     yaxis: { title: "Locus",
+      var layout = { xaxis: { title: "" },
+                     yaxis: { title: "",
                               ticks: "",
                               showticklabels: false },
-                     paper_bgcolor: graph_bgcolor};
-      Plotly.newPlot(motif_div, data, layout);
+                     paper_bgcolor: graph_bgcolor,
+                     autosize: false,
+                     width: 500,
+                     height: 590,
+                     margin: {l:10,r:80,t:15,b:168}};
+      Plotly.newPlot(div, data, layout);
     }
   }
   motif_request.send();
@@ -375,6 +404,9 @@ var graphs = new Graphs([{id: "tfbs_depth_graph", draw: tfbs_depth_graph},
                          {id: "dhs_depth_graph", draw: dhs_depth_graph},
                          {id: "chromatin_state_graph",
                           draw: chromatin_state_graph},
-                         {id: "heat_maps", draw: heatmap_graph}]);
+                         {id: "tree", draw: tree_graph},
+                         {id: "ortholog_with_phylo", draw: ortholog_graph},
+                         {id: "tfbs_with_phylo", draw: tfbs_phylo_graph},
+                         {id: "motif_with_phylo", draw: motif_phylo_graph}]);
 update_herv_list(graphs);
 set_params_event(graphs);

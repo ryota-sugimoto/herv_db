@@ -1,5 +1,12 @@
 body { background-color: beige; }
 
+a { text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+span.help a { text-decoration: underline; 
+              color: inherit; }
+span.help a:visited { color: inherit; }
+
 div#wrap { margin: auto;
            height: 95vh;
            width: 95vw;
@@ -10,12 +17,17 @@ div#wrap { margin: auto;
 div#contents { display: flex;
                flex-direction: row; }
 
-div#param_box { margin-bottom: 5px; }
+div#param_box { margin-bottom: 20px; }
+
+div#param_box h4 { margin-top: 10px; 
+                   margin-bottom: 0px;
+                   color: darkcyan; } 
+
 
 div#left { display: flex;
            flex-direction: column; }
 
-div#herv_menu { width: 300px;
+div#herv_menu { width: 400px;
                 overflow: auto;}
 
 div#left ul { margin: 0;
@@ -35,6 +47,25 @@ div#right { padding-left: 20px;
 div#text_body { display: none; }
 
 
-.herv_name { color: #2724ce; }
+div#text_body span { color: #ce1c10; }
 
 img { height: 500px; }
+
+div#phylocontainer { overflow-x:auto;
+                              overflow-y:hidden;
+                              width:100%;
+                              white-space:nowrap;}
+
+.phylo_legend {display:inline-block;
+                     margin-right:1%;
+                     width:19%;
+                     vertical-align:top;
+                     white-space:normal;
+                     width:500px}
+
+.phylo_graph {display:inline-block;
+                    margin-right:1%;
+                    width:19%;
+                    vertical-align:top;
+                    white-space:normal;
+                    width:500px}
