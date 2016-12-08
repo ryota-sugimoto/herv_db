@@ -31,7 +31,7 @@ $(function() {
         <input id="hcre1" type="checkbox" name="hcre" value="hcre" checked>Only TFs corresponding to HCREs</input></br>
         
         <form id="z_score_mode">
-          Statistical Thresholds: <span class="help"><a href="#" title="The count-based z score was calculated by the number of HERV-TFBS overlaps. Meanwhile, the depth-based z score is the maximum value of the base-wised z score which is computed by the depth of TFBSs in each consensus positions. Please note that a depth-based z score tends to be higher than a count-based z score, particularly in HERV/LR type whose length is long(such as internal sequence of HERV/LRs).">?</a></span></br>
+          Statistical Thresholds: <span class="help"><a href="#" title="The count-based z score was calculated by the number of HERV-TFBS overlaps. Meanwhile, the depth-based z score is the maximum value of the base-wised z score which is computed by the depth of TFBSs in each consensus positions. Please note that a depth-based z score tends to be higher than a count-based z score, particularly in HERV/LR type whose length is long (such as internal sequence of HERV/LRs).">?</a></span></br>
           <input type="radio" name="z_score_mode" value="Count" >Count-based z score</input></br>
           <input type="radio" name="z_score_mode" value="Depth" checked>Depth-based z score</input></br>
         </form>
@@ -42,7 +42,7 @@ $(function() {
         z score &gt;= <input id="z_score2" type="number" value="3" min="-1000" max="1000" step="0.1"></br>
         The upper limit of TFs shown in the graph: <input id="limit2" type="number" value="10" min="1" max="100" step="1">
         <h4>Parameters for download</h4>
-        <input id="merge_cell_types" type="checkbox" checked>Merge cell types</input> <span class="help"><a href="#" title="If you chose this option, you can download following information identified by using TFBSs or DHSs merged among cell types; genomic positions of HERV-TFBSs, HCREs, HERV-DHSs, and Gene Ontology (GO) associated with a particular kind of HCREs. If you don’t choose this option, you can download above information separately in respective cell types.">?</a></span></br>
+        <input id="merge_cell_types" type="checkbox" checked>Merge cell types</input> <span class="help"><a href="#" title="If you chose this option, you can download following information identified by using TFBSs or DHSs merged among cell types; genomic positions of HERV-TFBSs, HCREs, HERV-DHSs, and Gene Ontology (GO) associated with a particular kind of HCREs. If you don&#39;t choose this option, you can download above information separately in respective cell types.">?</a></span></br>
       </div>
       <div id="herv_menu"></div>
     </div>
@@ -59,7 +59,7 @@ $(function() {
         Number of copies (fragments): <span id="copy_number"></span></br>
         10% of the copies are shared within: <span id="integration_date"></span>
         </div>
-        <p><a id="dl_hcre" class="download_anchor">Download</a> the positions of transctiption factor binding sites for the consensus sequence of <span class="herv_name"></span>.</p>
+        <p><a id="dl_hcre" class="download_anchor">Download</a> the positions of HCREs on the consensus sequence of <span class="herv_name"></span>.</p>
 
         <h2>Metaplot of HERV-TFBSs</h2>
         <p>Number of HERV-TFBSs mapped on each consensus position of the HERV/LR type. The x-axis indicates nucleotide positions of the consensus sequence of the HERV/LR type. The y-axis indicates number of HERV/LR copies harboring HERV-TFBSs at each position.</p>

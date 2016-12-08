@@ -119,7 +119,7 @@ def motif_depth(request, herv_name):
 def motif_depth_dot(request, herv_name):
   request.responseHeaders.addRawHeader("Content-Type",
                                        "application/json")
-  query = 'SELECT SQ.HERV, SQ.TF, M.Motif_Id, M.Start_in_consensus_seq, M.End_in_consensus_seq, SQ.Depth FROM Motif_Id AS M NATURAL JOIN (HCREs_Id AS HC NATURAL JOIN (SELECT * FROM((HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN TFBS_depth AS D) WHERE HT.HERV="%(herv_name)s" AND HT.HCREs REGEXP "%(hcre)s" AND T.Project REGEXP "%(db)s" AND HT.%(z_score_mode)s_based_z_score >= %(z_score)s ORDER BY HT.%(z_score_mode)s_based_z_score DESC LIMIT %(limit)s) AS SQ);'
+  query = 'SELECT SQ.HERV, SQ.TF, M.Motif_Id, M.Start_in_consensus_seq, M.End_in_consensus_seq, SQ.Depth FROM Motif_Id AS M NATURAL JOIN (HCREs_Id AS HC NATURAL JOIN (SELECT * FROM((HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Motif_depth AS D) WHERE HT.HERV="%(herv_name)s" AND HT.HCREs REGEXP "%(hcre)s" AND T.Project REGEXP "%(db)s" AND HT.%(z_score_mode)s_based_z_score >= %(z_score)s ORDER BY HT.%(z_score_mode)s_based_z_score DESC LIMIT %(limit)s) AS SQ);'
   params = get_params(request)
   params["herv_name"] = str(herv_name)
   query %= params
@@ -130,9 +130,9 @@ def motif_depth_dot(request, herv_name):
       d = {}
       start,end = int(t[3]), int(t[4])
       d["x"] = [int((start + end)/2.0)]
-      d["y"] = [int(max(t[5].split(",")[start:end]))]
+      d["y"] = [int(max(t[5].split(",")[start:end]))*1.05]
       d["mode"] = "markers"
-      d["name"] = t[1]
+      d["name"] = t[1] + "_" + t[2]
       res.append(d)
     return json.dumps(res)
   d.addCallback(f)
@@ -245,21 +245,13 @@ def motif_map_json(t):
   if n_x == 0:
     return json.dumps([])
   n_y = len(t[0][2].split(","))
-  res["x"] = [x1+x2 for x1,x2,_ in t]
+  res["x"] = [x1+"_"+x2 for x1,x2,_ in t]
   res["y"] = range(n_y)
   res["z"] = [[0] * n_x for _ in range(n_y)]
   for ix,(_,_,zz) in enumerate(t):
     zz = map(float, zz.split(","))
     for iy,z in enumerate(zz):
       res["z"][iy][ix] = z
-      '''
-      if z < 10**(-3)and z > 10**(-4):
-        res["z"][iy][ix] = 0.5
-      elif z <= 10**-4:
-        res["z"][iy][ix] = 0
-      else:
-        res["z"][iy][ix] = 1
-      '''
   return json.dumps([res])
 @app.route("/graph_data/motif_phylogeny/<herv_name>")
 def motif_phylogeny_graph(request, herv_name):

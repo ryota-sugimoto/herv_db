@@ -300,7 +300,7 @@ function motif_phylo_graph(herv_name, params, div) {
                               showticklabels: false },
                      paper_bgcolor: graph_bgcolor,
                      autosize: false,
-                     width: 500,
+                     width: 750,
                      height: 590,
                      margin: {l:10,r:80,t:15,b:168}};
       Plotly.newPlot(div, data, layout);
