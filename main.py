@@ -438,10 +438,11 @@ def herv_list(request):
   request.responseHeaders.addRawHeader("Content-Type",
                                        "application/json")
   params = get_params(request)
-  query = 'SELECT HT.HERV, count(HT.HERV) FROM HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T WHERE HT.HCREs="%(hcre)s" AND T.Project REGEXP "%(db)s" AND HT.%(z_score_mode)s_based_Z_score >= %(z_score)s GROUP BY HT.HERV ;'
+  query = 'SELECT HT.HERV, count(HT.HERV) FROM HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T WHERE HT.HCREs REGEXP "%(hcre)s" AND T.Project REGEXP "%(db)s" AND HT.%(z_score_mode)s_based_Z_score >= %(z_score)s GROUP BY HT.HERV ;'
   query %= params
   d = dbpool.runQuery(query)
   def f(l):
+    print l
     res = []
     for t in l:
       d = {}
