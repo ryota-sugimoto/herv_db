@@ -72,13 +72,13 @@ def get_params(request):
   
   return d
 
-@app.route("/static/<file_name>")
-def static(request, file_name):
-  return File("./static/"+file_name)
+@app.route("/static/", branch=True)
+def static(request):
+  return File("./static")
 
 main_html = "".join(list(open("static/main.html")))
 @app.route("/")
-def pg_main(request):
+def pg_main_root(request):
   return main_html
 
 def convert_json(l):
@@ -286,7 +286,6 @@ def dl_hcre(request, herv_name):
                                        "text/tab-separated-values")
   query = 'SELECT HC.HERV, T.TF, M.Motif_Id, M.Motif_name, M.Motif_origin, M.Start_in_consensus_seq, M.End_in_consensus_seq FROM(Motif_Id AS M NATURAL JOIN HCREs_Id AS HC) NATURAL JOIN TFBS_Id AS T WHERE HC.HERV = "%s";'
   query %= (str(herv_name), )
-  print query, type(query)
   d = dbpool.runQuery(query)
   d.addCallback(dl_hcre_format)
   return d
@@ -303,10 +302,8 @@ def dl_herv_tfbs_position(request, herv_name):
     tf_query = ' AND T.TF = "%s";' % (params["tf"],)
 
   if params["merge_cell_types"]:
-    print "merge true"
     query = 'SELECT HT.HERV, T.TF, P.Chrom, P.Start, P.End, P.Locus FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Position_HERV_TFBS_Merged AS P WHERE HT.HERV = "%s"' + tf_query
   else:
-    print "merge_false"
     query = 'SELECT HT.HERV, T.TF, P.Chrom, P.Start, P.End, P.Locus, D.Cell_name, D.Note, D.File_name FROM((HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Position_HERV_TFBS_in_each_cell AS P) NATURAL JOIN Dataset AS D WHERE HT.HERV = "%s"' + tf_query
 
   query %= (str(herv_name),)
@@ -398,7 +395,6 @@ def tf_list(request, herv_name):
   params = get_params(request)
   params["herv_name"] = str(herv_name)
   query %= params
-  print query
   d = dbpool.runQuery(query)
   d.addCallback(lambda l: json.dumps([t[0] for t in l]))
   return d
@@ -442,7 +438,6 @@ def herv_list(request):
   query %= params
   d = dbpool.runQuery(query)
   def f(l):
-    print l
     res = []
     for t in l:
       d = {}

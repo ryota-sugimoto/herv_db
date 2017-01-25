@@ -1,5 +1,8 @@
 body { background-color: beige; }
 
+div#download { display: none; }
+div#help { display:none; }
+
 a { text-decoration: none; }
 a:hover { text-decoration: underline; }
 
@@ -13,9 +16,17 @@ div#wrap { margin: auto;
            display: flex;
            flex-direction: column; }
 
+div#menu ul { display: flex;
+              flex-direction: row;
+              list-style-type: none;
+              padding-left: 0px;
+              background-color: lightblue; }
 
-div#contents { display: flex;
-               flex-direction: row; }
+div#menu ul li { font-size: 30px; 
+                 margin-right: 15px; }
+
+div#basic_info { display: flex;
+                 flex-direction: row; }
 
 div#param_box { margin-bottom: 20px; }
 
@@ -35,8 +46,7 @@ div#left ul { margin: 0;
               background-color: darkseagreen;
               list-style-type: none; }
 
-div#left li:hover { cursor: hand;
-                    background-color: yellow; }
+div#left li:hover { background-color: yellow; }
 
 form#z_score_mode { margin-bottom: 0px; }
 

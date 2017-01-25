@@ -15,10 +15,15 @@ $(function() {
 </script>
 </head>
 <body>
-<script src="static/plotly.min.js"></script>
 <div id="wrap">
-  <div id="title"><h1>dbHERV-REs: A Database of HERV Regulatory Elements</h1></div>
-  <div id="contents">
+  <div id="menu">
+    <ul>
+      <li><a href="">dbHERV-REs</a></li>
+      <li><a href="#!download">Download</a></li>
+      <li><a href="#!help">Help</a></li>
+    </ul>
+  </div>
+  <div id="basic_info">
     <div id="left">
       <div id="param_box">
         <h4>Parameters for filtering HERV-TFBSs and HCREs</h4>
@@ -57,7 +62,7 @@ $(function() {
         HERV/LR type: <span class="herv_name"></span></br>
         HERV/LR family: <span id="herv_family"></span></br>
         Number of copies (fragments): <span id="copy_number"></span></br>
-        10% of the copies are shared within: <span id="integration_date"></span>
+        More than 10% of the copies are shared within: <span id="integration_date"></span>
         </div>
         <p><a id="dl_hcre" class="download_anchor">Download</a> the positions of HCREs on the consensus sequence of <span class="herv_name"></span>.</p>
 
@@ -109,7 +114,52 @@ $(function() {
       </div>
     </div>
   </div>
+  <div id ="download">
+  <p><a href="static/download/all_data_set.tar.gz">Download</a> all data set. (93MiB, MD5=611f3d6202dd45ce5dd104b103c27117)</p>
+  </div>
+  <div id="help">
+    <h2>Frequently Asked Questions (FAQs)</h2>
+    <h3>What are HCREs (HERV/LR conserved regulatory elements)?</h3>
+    <p>When a regulatory element is observed on a sequence of HERV/LR, there are two possible evolutionary scenarios to depict how the regulatory element was generated.</p>
+    <img src="static/picture/fig1.png">
+    <p class="center">The regulatory element originally existed in the HERV/LR before the insertion.</p>
+    <img src="static/picture/fig2.png">
+    <p class="center">The regulatory element was newly arisen by mutations after the insertion.</p>
+    <p>We probably can distinguish the two scenarios by examining many of the HERV/LRs interspersed in the genome. Namely, the former scenario is more likely if the regulatory elements are shared/conserved among HERV/LR copies. For this purpose, we defined investigated HCREs, regulatory elements (TF-binding motifs in TFBSs) that are shared/conserved within a substantial fraction of HERV/LR copies. We identified HCREs as following procedures.</p>
+    <img src="static/picture/fig3.png">
+    <ol>
+      <li>HERV-TFBS overlaps (HERV-TFBSs) were identified in respective cell types. Then HERV-TFBSs in distinct cell types were merged (merged HERV-TFBSs).</li>
+      <li>Multiple sequence alignment (MSA) of HERV/LR copies was constructed. Position of the merged HERV-TFBS was mapped on sequences in the MSA.</li>
+      <li>TF-binding motif was scanned in HERV-TFBS and mapped on each sequence in the MSA.<li>
+      <li>HERV-TFBSs and TF-binding motifs were counted at each consensus position in the MSA. If the peak of TF-binding motifs was higher than 70% of the peak of HERV-TFBSs, we referred to TF-binding motifs comprising the peak as HCREs.</li>
+    </ol>
+    <p>We investigated HCREs for two purposes; (i) to infer property of regulatory elements that were anciently present in HERV/LRs or their ancestors of exogenous retroviruses, and (ii) to identify a set of regulatory elements that coordinately work in the genome. HCREs are shared among many HERV/LR copies that are interspersed in the genome, and then a set of HCREs can modulate several genes in a coordinate manner.</p>
+    <img src="static/picture/fig4.png"> 
+    <p>For this reason, many researchers considered that HERV/LRs sharing regulatory elements contributed to evolution of gene regulatory networks of the host.</p>
+    <h3>What kind of statistical threshold is used for filtering HERV-TFBSs or HERV-DHSs?</h3>
+    <p>Sequences of HERV/LRs occupy a substantial fraction (9%) of the human genome, and so it is natural that some of TFBSs/DHSs are observed on the HERV/LR sequences. Therefore, it is important to identify TFBSs that were frequently observed among HERV/LR copies at a statistically significant level. For this purpose, we performed two kinds of permutation tests for filtering HERV-TFBSs; count-based and depth-based permutation tests. In the both tests, TFBSs identified in several cell types were merged and then used.</p>
+    <ol>
+      <li><p>Count-based permutation test</p>
+        <p>We generated 100 randomized datasets of TFBSs by permuting genomic position of the TFBSs. In the observed and randomized datasets, HERV-TFBS overlaps were counted. Standardized score (z score) was calculated based on counts in the observed and the randomized datasets.</p>
+      </li>
+      <li><p>Depth-based permutation test</p>
+        <p>We generated 500 randomized datasets of TFBSs by permuting genomic position of the TFBSs. In the observed and randomized datasets, depth of TFBSs in the MSA (Fig. 1C top) was measured at each consensus position. Z score was calculated at each consensus position based on depths in the observed, and randomized datasets (referred to as base-wised z score). After smoothing the base-wised z score with sliding window algorithm (window size; 50 bp), the maximum base-wised z score among all positions was defined as a depth-based z score.</p>
+      </li>
+    </ol>
+    <p>For filtering of HERV-DHSs, the count-based permutation test is available. Depth-based z score can distinguish the two situations shown in Fig. 4 whereas count-based z score cannot. Please note that a depth-based z score tends to be more sensitive than a count-based z score, particularly when a HERV/LR type has long consensus sequence (such as internal sequence of HERV/LRs).</p>
+    <img src="static/picture/fig5.png">
+    <h3>How genomic positions were described in files downloaded from this website?</h3>
+    <p>These files were written by BED-like format. Namely, a row indicate a particular genomic feature (HERV-TFBSs) and its genomic position; chromosome name, cromStart position, and chromEnd position. The first base in a chromosome is numbered 0, and the chromEnd base is not included in the feature. For example, the first 100 bases of a chromosome are defined as chromStart=0, chromEnd=100, and span the bases numbered 0-99.</p>
+    
+    <h2>Staff</h2>
+      <ul>
+        <li><b>Itsuro Inoue</b> Principal Investigator, Professor</li>
+        <li><b>Jumpei Ito</b> Project Leader, Researcher</li>
+        <li><b>Ryota Sugimoto</b> Programmer</li>
+      </ul>
+  </div>
 </div>
+<script src="static/plotly.min.js"></script>
 <script src="static/main.js"></script>
 </body>
 </html>

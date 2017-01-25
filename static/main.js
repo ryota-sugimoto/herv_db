@@ -63,31 +63,28 @@ function update_herv_list(graphs) {
       var ul = document.createElement("ul");
       ul.setAttribute("id", "herv_list");
       function herv_list_onclick(event) {
-        if (event.currentTarget.tagName == "LI") {
-          var li = event.currentTarget
-          for (var i=0; i<li.parentNode.children.length; i++) {
-            var child = li.parentNode.children[i];
-            child.style.backgroundColor = color;
+        var target = event.currentTarget;
+        var li = function () {
+          var tag = target;
+          while (tag.tagName!="LI") {
+            tag = tag.parentNode;
           }
-          li.style.backgroundColor = "cyan";
-          var herv_name = li.id;
-          graphs.current_herv_name = herv_name;
-          graphs.draw(herv_name, params);
+          return tag;
+        }();
+        if (!li) { return; }
 
-          set_select_options(herv_name, params);
-          //TODO info function comes here
-          var request_info = new XMLHttpRequest();
-          request_info.open("GET", "/info/"+herv_name, true);
-          request_info.onreadystatechange = function(){
-            if (this.readyState == 4 && this.status == 200){
-              var json = JSON.parse(this.responseText);
-              document.getElementById("herv_family").innerHTML = json["family"];
-              document.getElementById("copy_number").innerHTML = json["copy_number"];
-              document.getElementById("integration_date").innerHTML = json["integration_data"];
-            }
+        var ul = function () { 
+          var tag = target; 
+          while (tag.tagName!="UL") {
+            tag = tag.parentNode;
           }
-          request_info.send();
+          return tag;
+        }();
+        
+        for (var i=0; i<ul.children.length; i++) {
+          ul.children[i].style.backgroundColor = color;
         }
+        li.style.backgroundColor = "cyan";
       }
       for (var i=0; i < hervs.length; i++) {
         var herv_name = hervs[i]["herv_name"];
@@ -97,7 +94,11 @@ function update_herv_list(graphs) {
         li.style.display = "flex";
         li.style.flexDirection = "row";
         var herv_name_div = document.createElement("DIV");
-        herv_name_div.innerHTML = herv_name;
+        var a = document.createElement("A");
+        a.href = "#!basic-info/"+herv_name;
+        a.innerHTML = herv_name;
+        a.addEventListener("click", herv_list_onclick, false);
+        herv_name_div.appendChild(a);
         herv_name_div.style.width = "200px";
         var n_div = document.createElement("DIV");
         n_div.innerHTML = n;
@@ -106,7 +107,6 @@ function update_herv_list(graphs) {
         if (graphs.current_herv_name == li.id) {
           li.style.backgroundColor = "cyan";
         }
-        li.addEventListener("click", herv_list_onclick, false);
         ul.appendChild(li);
       }
       var color = ul.style.backgroundColor;
@@ -116,18 +116,59 @@ function update_herv_list(graphs) {
   request.send();
 }
 
-function set_params_event(graphs) {
-  var param_div = document.getElementById("param_box")
-  function param_change(event) {
-    update_herv_list(graphs);
-    var params = get_params();
-    if (graphs.current_herv_name) {
-      graphs.draw(graphs.current_herv_name, params);
-      set_select_options(graphs.current_herv_name, params);
+function hash_change(e) {
+  var hash = location.hash;
+  if (hash.substring(0,2) == "#!") {
+    var hashpath = hash.substring(2);
+    var path1 = hashpath.split("/")[0]
+    if (path1 == "basic-info") {
+      document.getElementById("basic_info").style.display = "flex";
+      document.getElementById("download").style.display = "none";
+      document.getElementById("help").style.display = "none";
+      var herv_name = hashpath.split("/")[1]
+      hash_change_basic_info(herv_name);
+    } else if (path1 == "download") {
+      document.getElementById("basic_info").style.display = "none";
+      document.getElementById("download").style.display = "block";
+      document.getElementById("help").style.display = "none";
+    } else if (path1 == "help") {
+      document.getElementById("basic_info").style.display = "none";
+      document.getElementById("download").style.display = "none";
+      document.getElementById("help").style.display= "block";
     }
   }
-  param_div.addEventListener("change", param_change, false);
 }
+window.addEventListener("hashchange", hash_change);
+
+function hash_change_basic_info(herv_name) {
+  var params = get_params();
+  graphs.current_herv_name = herv_name;
+  graphs.draw(herv_name, params);
+  set_select_options(herv_name, params);
+
+  var request_info = new XMLHttpRequest();
+  request_info.open("GET", "/info/"+herv_name, true);
+  request_info.onreadystatechange = function(){
+    if (this.readyState == 4 && this.status == 200){
+      var json = JSON.parse(this.responseText);
+      document.getElementById("herv_family").innerHTML = json["family"];
+      document.getElementById("copy_number").innerHTML = json["copy_number"];
+      document.getElementById("integration_date").innerHTML = json["integration_data"];
+    }
+  }
+  request_info.send();
+}
+
+function param_change(event) {
+  update_herv_list(graphs);
+  var params = get_params();
+  if (graphs.current_herv_name) {
+    graphs.draw(graphs.current_herv_name, params);
+    set_select_options(graphs.current_herv_name, params);
+  }
+}
+var param_div = document.getElementById("param_box")
+param_div.addEventListener("change", param_change, false);
 
 
 function create_args_for_tfbs(params) {
@@ -157,6 +198,7 @@ function tfbs_depth_graph(herv_name, params, div) {
       var layout = { title: "TFBS Depth",
                      xaxis: { title: "Position (nt)" },
                      yaxis: { title: "HERV-TFBSs (copy)" },
+                     showlegend: true,
                      paper_bgcolor: graph_bgcolor};
       Plotly.newPlot(div, data, layout);
     }
@@ -202,6 +244,7 @@ function dhs_depth_graph(herv_name, params, div) {
       var layout = { title: "DHS Depth",
                      xaxis: { title: "Position (nt)" },
                      yaxis: { title: "HERV-DHSs (copy)" },
+                     showlegend: true,
                      paper_bgcolor: graph_bgcolor};
       Plotly.newPlot(div, data, layout);
     }
@@ -409,4 +452,6 @@ var graphs = new Graphs([{id: "tfbs_depth_graph", draw: tfbs_depth_graph},
                          {id: "tfbs_with_phylo", draw: tfbs_phylo_graph},
                          {id: "motif_with_phylo", draw: motif_phylo_graph}]);
 update_herv_list(graphs);
-set_params_event(graphs);
+if  (location.hash.substring(0,2) == "#!") {
+  hash_change(null);
+}
