@@ -5,6 +5,8 @@ div#menu a:visited { color: blue; }
 div#download { display: none; }
 div#help { display:none; }
 
+p.red { color: red; }
+
 a { text-decoration: none; }
 a:hover { text-decoration: underline; }
 
@@ -92,3 +94,7 @@ div#help img:nth-of-type(4) { height: 200px; }
 div#help img:nth-of-type(5) { height: 400px; }
 
 div#help p.center { text-align: center; }
+sup {
+    vertical-align: super;
+    font-size: smaller;
+}
