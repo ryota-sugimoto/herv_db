@@ -1,5 +1,7 @@
 body { background-color: beige; }
 
+div#menu a:visited { color: blue; }
+
 div#download { display: none; }
 div#help { display:none; }
 
@@ -7,8 +9,8 @@ a { text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 span.help a { text-decoration: underline; 
-              color: inherit; }
-span.help a:visited { color: inherit; }
+              color: blue; }
+span.help a:visited { color: blue; }
 
 div#wrap { margin: auto;
            height: 95vh;

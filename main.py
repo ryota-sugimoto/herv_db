@@ -276,7 +276,7 @@ def tree_image(request, herv_name):
   return d
 
 def dl_hcre_format(l):
-  res = ["HERV\tTF\tMotif_Id\tMatched_motif\tMotif_source\tStart_position_in_consensus_seq\tEnd_position_in_consensus_seq"]
+  res = ["HERV\tTF\tChrom\tStart\tEnd\tMotif_Id\tMatched_motif\tMotif_source\tStart_position_in_consensus_seq\tEnd_position_in_consensus_seq"]
   for t in l:
     res.append("\t".join(str(i) for i in t))
   return "\n".join(res)
