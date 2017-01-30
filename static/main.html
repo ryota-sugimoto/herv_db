@@ -1,7 +1,9 @@
 <html>
 <head>
 <title>dbHERV-REs</title>
+
 <link rel=stylesheet type="text/css" href="static/style.css">
+
 <link type="text/css" rel="stylesheet"
   href="http://code.jquery.com/ui/1.10.3/themes/cupertino/jquery-ui.min.css" />
 <script type="text/javascript"
@@ -36,25 +38,25 @@ $(function() {
         <input id="hcre1" type="checkbox" name="hcre" value="hcre" checked>Only TFs corresponding to HCREs</input></br>
         
         <form id="z_score_mode">
-          Statistical Thresholds: <span class="help"><a href="#" title="The count-based z score was calculated by the number of HERV-TFBS overlaps. Meanwhile, the depth-based z score is the maximum value of the base-wised z score which is computed by the depth of TFBSs in each consensus positions. Please note that a depth-based z score tends to be higher than a count-based z score, particularly in HERV/LR type whose length is long (such as internal sequence of HERV/LRs).">?</a></span></br>
-          <input type="radio" name="z_score_mode" value="Count" >Count-based z score</input></br>
-          <input type="radio" name="z_score_mode" value="Depth" checked>Depth-based z score</input></br>
+          Statistical Thresholds: <span class="help" title="Note that a depth-based z score tends to be higher than a count-based z score, particularly in HERV/LR type whose length is long (such as internal sequence of HERV/LRs). See FAQs in Help page or our paper." >?</span></br>
+          <input type="radio" name="z_score_mode" value="Count" >Count-based permutation test</input></br>
+          <input type="radio" name="z_score_mode" value="Depth" checked>Depth-based permutation test</input></br>
         </form>
         z score &gt;= <input id="z_score1" type="number" value="3" min="-1000" max="1000" step="0.1"></br>
         The upper limit of TFs shown in the graphs: <input id="limit1" type="number" value="10" min="1" max="100" step="1"></input>
         <h4>Parameters for filtering HREV-DHSs</h4>
-        <input id="represent" type="checkbox" name="represent" value="represent" checked>Only tier 1 and 2 cells</input> <span class="help"><a href="#" title="If you choose this option, HERV-DHSs in cell types classified into ENCODE tier 1 (GM12878, H1-ES, K562), tier 2 (HepG2, HeLa S3, HUVEC), and a part of tier 2.5 (A549, MCF7) cells are only shown.">?</a></span></br>
+        <input id="represent" type="checkbox" name="represent" value="represent" checked>Only tier 1 and 2 cells</input> <span class="help" title="If you choose this option, the graph only shows HERV-DHSs in GM12878, H1-ES, K562, HepG2, HeLa S3, HUVEC, A549, and MCF7 cells, all of which are cllasified into ENCODE tier 1, 2, and, 3 cells." >?</span></br>
         z score &gt;= <input id="z_score2" type="number" value="3" min="-1000" max="1000" step="0.1"></br>
         The upper limit of TFs shown in the graph: <input id="limit2" type="number" value="10" min="1" max="100" step="1">
         <h4>Parameters for download</h4>
-        <input id="merge_cell_types" type="checkbox" checked>Merge cell types</input> <span class="help"><a href="#" title="If you chose this option, you can download following information identified by using TFBSs or DHSs merged among cell types; genomic positions of HERV-TFBSs, HCREs, HERV-DHSs, and Gene Ontology (GO) associated with a particular kind of HCREs. If you don&#39;t choose this option, you can download above information separately in respective cell types.">?</a></span></br>
+        <input id="merge_cell_types" type="checkbox" checked>Merge cell types</input> <span class="help" title="If you chose this option, you can download the following information identified using TFBSs or DHSs that were merged among cell types; genomic positions of HERV-TFBSs, HCREs, HERV-DHSs, and Gene Ontology (GO) associated with a particular kind of HCREs. If you don&#39;t choose this option, you can download the above information separately in respective cell types." >?</span></br>
       </div>
       <div id="herv_menu"></div>
     </div>
     <div id="right">
       <div id="introduction">
         <h2>Introduction</h2>
-        <p>Human endogenous retroviruses and other LTR type retrotransposons (HERV/LRs) have regulatory elements possibly affecting on transcriptions of host genes. dbHERV-REs is a database for these regulatory elements of HERV/LRs. The dbHERV-REs provides following information; (i) HERV-TFBSs, overlaps between HERV/LRs and transcription factor binding sites (TFBSs) determined by ChIP-Seq with 100 transcription factors (TFs), (ii) HERV/LRs Conserved Regulatory Elements (HCREs), TF-binding motifs in HERV-TFBSs that are conserved among quite a few copies of a type of HERV/LRs, (iii) HERV-DHSs, overlaps between HERV/LRs and DNase I hypersensitive sites (DHSs), an indicator of chromosome free regions, and (iv) Gene Ontology (GO) terms in which insertions of a kind of HCREs were enriched. Additionally, in order to approach evolutionary dynamics of regulatory elements that occurred in the course of genomic expansion of the HERV type, this database can compare phylogenetic tree of copies of a HERV/LR type with presence or absence of TFBSs, TF-binding motifs, and orthologous copies in genome of mammalians. Further descriptions are written in our paper [REF].</p>
+        <p>Human endogenous retroviruses and other LTR type retrotransposons (HERV/LRs) have regulatory elements possibly affecting on transcriptions of host genes. dbHERV-REs is a database for these regulatory elements of HERV/LRs. The dbHERV-REs provides following information; (i) HERV-TFBSs, overlaps between HERV/LRs and transcription factor (TF)-binding sites (TFBSs), which were determined by ChIP-Seq, (ii) HERV/LRs Conserved Regulatory Elements (HCREs), TF-binding motifs in HERV-TFBSs that are conserved within a substantial fraction of a HERV/LR type, (iii) HERV-DHSs, overlaps between HERV/LRs and DNase I hypersensitive sites (DHSs), and (iv) Gene Ontology (GO) terms in which insertions of a kind of HCREs were enriched. Additionally, to approach evolutionary dynamics of regulatory elements in HERV/LRs, phylogenetic tree of a HERV/LR type is compared with presence of TFBSs, TF-binding motifs, and orthologous copies in genome of mammalians. Further descriptions are written in our paper.</p>
       </div>
       <div id="text_body">
         <h2>General Information</h2>
@@ -64,7 +66,7 @@ $(function() {
         Number of copies (fragments): <span id="copy_number"></span></br>
         More than 10% of the copies are shared within: <span id="integration_date"></span>
         </div>
-        <p><a id="dl_hcre" class="download_anchor">Download</a> the positions of HCREs on the consensus sequence of <span class="herv_name"></span>.</p>
+        <p><a id="dl_hcre" class="download_anchor">Download</a> information of HCREs of <span class="herv_name"></span>.</p>
 
         <h2>Metaplot of HERV-TFBSs</h2>
         <p>Number of HERV-TFBSs mapped on each consensus position of the HERV/LR type. The x-axis indicates nucleotide positions of the consensus sequence of the HERV/LR type. The y-axis indicates number of HERV/LR copies harboring HERV-TFBSs at each position.</p>
@@ -91,7 +93,7 @@ $(function() {
           <div id="legend">
             <div class="phylo_legend">
               <h3>Phylogenetic tree</h3>
-              <p>An unrooted phylogenetic tree of HERV/LR copies. Representative supporting values calculated by Shimodaira-Hasegawa (SH)-like test [REF] are shown at the corresponding branches.</p>
+              <p>An unrooted phylogenetic tree of HERV/LR copies. Representative supporting values calculated by Shimodaira-Hasegawa (SH)-like test are shown at the corresponding branches.</p>
             </div>
             <div class="phylo_legend">
               <h3>Orthologous copies</h3>
@@ -115,10 +117,16 @@ $(function() {
     </div>
   </div>
   <div id ="download">
-  <p><a href="static/download/all_data_set.tar.gz">Download</a> all data set. (93MiB, MD5=611f3d6202dd45ce5dd104b103c27117)</p>
+  <p><a href="static/download/all_data_set.zip">Download</a> all data set. (93MiB, MD5=e3b156723df8e9da426b7d44215d0cb2, the last update; Jan. 30, 2017)</p>
   </div>
   <div id="help">
     <h2>Frequently Asked Questions (FAQs)</h2>
+    <h3>What kinds of data are available?</h3>
+      <li>Transcription factor (TF)-binding sites (TFBSs) presented by the ENCODE and Roadmap Epigenomics. The 577 ChIP-Seq analyses were perfumed against 100 sequence-specific and pol II-associated TFs in total 100 cell lines.</li>
+      <li>DNase I hypersensitive sites (DHSs) presented by ENCODE. The DNase-Seq analyses were performed in 125 cell lines.</li>
+      <li>HERV/LR conserved regulatory elements (HCREs) identified by our original pipeline (see later).</li>
+      <li>General information of HERV/LR types; classification of the HERV/LR family, number of copies (fragments), and animal category that share orthologous copies of the HERV/LRs.</li>
+      <li>Comparison between phylogenetic relationship among the HERV/LR copies and presence of orthologous copies, TFBSs, and TF-binding motifs.</li>
     <h3>What are HCREs (HERV/LR conserved regulatory elements)?</h3>
     <p>When a regulatory element is observed on a sequence of HERV/LR, there are two possible evolutionary scenarios (Fig. 1A,1B) to depict how the regulatory element was generated.</p>
     <img src="static/picture/fig1.png">
@@ -139,26 +147,31 @@ $(function() {
     <p class="center">Figure 3. Coordinate gene regulations by a set of HCREs</p>
     <p>For this reason, many researchers considered that HERV/LRs sharing regulatory elements contributed to evolution of gene regulatory networks of the host.</p>
     <h3>What kind of statistical threshold is used for filtering HERV-TFBSs or HERV-DHSs?</h3>
-    <p>Sequences of HERV/LRs occupy a substantial fraction (9%) of the human genome, and so it is natural that some of TFBSs/DHSs are observed on the HERV/LR sequences. Therefore, it is important to identify TFBSs that were frequently observed among HERV/LR copies at a statistically significant level. For this purpose, we performed two kinds of permutation tests for filtering HERV-TFBSs; count-based and depth-based permutation tests. In the both tests, TFBSs identified in several cell types were merged and then used.</p>
+    <p>Sequences of HERV/LRs occupy a substantial fraction (9%) of the human genome, and so it is natural that some of TFBSs/DHSs are observed on the HERV/LR sequences. Therefore, it is important to identify TFBSs that were frequently observed among HERV/LR copies at a statistically significant level. For this purpose, we performed two kinds of permutation tests for filtering HERV-TFBSs; count-based and depth-based permutation tests. In the both tests, TFBSs that were identified in several cell types were merged and then used.</p>
     <ol>
       <li><p>Count-based permutation test</p>
-        <p>We generated 100 randomized datasets of TFBSs by permuting genomic position of the TFBSs. In the observed and randomized datasets, HERV-TFBS overlaps were counted. Standardized score (z score) was calculated based on counts in the observed and the randomized datasets.</p>
+        <p>We generated 100 randomized datasets of TFBSs by permuting genomic position of the TFBSs. In the observed and randomized datasets, HERV-TFBS overlaps were counted. Standardized score (z score) was calculated based on counts in the observed and the randomized datasets. The count-based test is available for all HERV-TFBS combinations.</p>
       </li>
       <li><p>Depth-based permutation test</p>
-        <p>We generated 500 randomized datasets of TFBSs by permuting genomic position of the TFBSs. In the observed and randomized datasets, depth of TFBSs in the MSA (Fig. 1C top) was measured at each consensus position. Z score was calculated at each consensus position based on depths in the observed, and randomized datasets (referred to as base-wised z score). After smoothing the base-wised z score with sliding window algorithm (window size; 50 bp), the maximum base-wised z score among all positions was defined as a depth-based z score.</p>
+        <p>We generated 500 randomized datasets of TFBSs by permuting genomic position of the TFBSs. In the observed and randomized datasets, depth of TFBSs in the MSA (Fig. 1C top) was measured at each consensus position. Z score was calculated at each consensus position based on depths in the observed, and randomized datasets (referred to as base-wised z score). After smoothing the base-wised z score with sliding window algorithm (window size; 50 bp), the maximum base-wised z score among all positions was defined as a depth-based z score. In respective HERV/LR types, the depth-based test is only done for TFBSs whose maximum depth in observed dataset is greater than or equal to 10.</p>
       </li>
     </ol>
     <p>For filtering of HERV-DHSs, the count-based permutation test is available. Depth-based z score can distinguish the two situations shown in Fig. 4 whereas count-based z score cannot. Please note that a depth-based z score tends to be more sensitive than a count-based z score, particularly when a HERV/LR type has long consensus sequence (such as internal sequence of HERV/LRs).</p>
     <img src="static/picture/fig5.png">
     <p class="center">Figure 4. Two possible situations when HERV-TFBS overlaps were observed at 5 times</p>
     <h3>How genomic positions were described in files downloaded from this website?</h3>
-    <p>These files were written by BED-like format. Namely, a row indicate a particular genomic feature (HERV-TFBSs) and its genomic position; chromosome name, cromStart position, and chromEnd position. The first base in a chromosome is numbered 0, and the chromEnd base is not included in the feature. For example, the first 100 bases of a chromosome are defined as chromStart=0, chromEnd=100, and span the bases numbered 0-99.</p>
+    <p>These files were written by BED-like format. Namely, a row indicate a particular genomic feature (HERV-TFBSs) and itsF genomic position; chromosome name, cromStart position, and chromEnd position. The first base in a chromosome is numbered 0, and the chromEnd base is not included in the feature. For example, the first 100 bases of a chromosome are defined as chromStart=0, chromEnd=100, and span the bases numbered 0-99.</p>
     
     <h2>Staff</h2>
       <ul>
-        <li><b>Itsuro Inoue</b> Principal Investigator, Professor</li>
-        <li><b>Jumpei Ito</b> Project Leader, Researcher</li>
+        <li><b>Itsuro Inoue</b> Principal Investigator, MD and PhD, Professor</li>
+        <li><b>Jumpei Ito</b> Project Leader</li>
         <li><b>Ryota Sugimoto</b> Programmer</li>
+        <p>Division of Human Genetics, National Institute of Genetics, Mishima, Shizuoka JAPAN</p>
+      </ul>
+    <h2>Contact</h2>
+      <ul>
+        <p>If there are some questions and comments on this database, please send e-mail to jito@nig.ac.jp.</p> 
       </ul>
   </div>
 </div>
