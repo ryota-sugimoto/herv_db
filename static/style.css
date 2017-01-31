@@ -5,6 +5,10 @@ div#menu a:visited { color: blue; }
 div#download { display: none; }
 div#help { display:none; }
 
+span.help { color: blue;
+            text-decoration: underline; }
+span.help:hover { cursor: pointer; }
+
 p.red { color: red; }
 
 a { text-decoration: none; }

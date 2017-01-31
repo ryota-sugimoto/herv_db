@@ -36,18 +36,18 @@ $(function() {
         <input id="hcre1" type="checkbox" name="hcre" value="hcre" checked>Only TFs corresponding to HCREs</input></br>
         
         <form id="z_score_mode">
-          Statistical Thresholds: <span class="help"><a href="#" title="The count-based z score was calculated by the number of HERV-TFBS overlaps. Meanwhile, the depth-based z score is the maximum value of the base-wised z score which is computed by the depth of TFBSs in each consensus positions. Please note that a depth-based z score tends to be higher than a count-based z score, particularly in HERV/LR type whose length is long (such as internal sequence of HERV/LRs).">?</a></span></br>
+          Statistical Thresholds: <span class="help" title="The count-based z score was calculated by the number of HERV-TFBS overlaps. Meanwhile, the depth-based z score is the maximum value of the base-wised z score which is computed by the depth of TFBSs in each consensus positions. Please note that a depth-based z score tends to be higher than a count-based z score, particularly in HERV/LR type whose length is long (such as internal sequence of HERV/LRs).">?</span></br>
           <input type="radio" name="z_score_mode" value="Count" >Count-based z score</input></br>
           <input type="radio" name="z_score_mode" value="Depth" checked>Depth-based z score</input></br>
         </form>
         z score &gt;= <input id="z_score1" type="number" value="3" min="-1000" max="1000" step="0.1"></br>
         The upper limit of TFs shown in the graphs: <input id="limit1" type="number" value="10" min="1" max="100" step="1"></input>
         <h4>Parameters for filtering HREV-DHSs</h4>
-        <input id="represent" type="checkbox" name="represent" value="represent" checked>Only tier 1 and 2 cells</input> <span class="help"><a href="#" title="If you choose this option, HERV-DHSs in cell types classified into ENCODE tier 1 (GM12878, H1-ES, K562), tier 2 (HepG2, HeLa S3, HUVEC), and a part of tier 2.5 (A549, MCF7) cells are only shown.">?</a></span></br>
+        <input id="represent" type="checkbox" name="represent" value="represent" checked>Only tier 1 and 2 cells</input> <span class="help" title="If you choose this option, HERV-DHSs in cell types classified into ENCODE tier 1 (GM12878, H1-ES, K562), tier 2 (HepG2, HeLa S3, HUVEC), and a part of tier 2.5 (A549, MCF7) cells are only shown.">?</span></br>
         z score &gt;= <input id="z_score2" type="number" value="3" min="-1000" max="1000" step="0.1"></br>
         The upper limit of TFs shown in the graph: <input id="limit2" type="number" value="10" min="1" max="100" step="1">
         <h4>Parameters for download</h4>
-        <input id="merge_cell_types" type="checkbox" checked>Merge cell types</input> <span class="help"><a href="#" title="If you chose this option, you can download following information identified by using TFBSs or DHSs merged among cell types; genomic positions of HERV-TFBSs, HCREs, HERV-DHSs, and Gene Ontology (GO) associated with a particular kind of HCREs. If you don&#39;t choose this option, you can download above information separately in respective cell types.">?</a></span></br>
+        <input id="merge_cell_types" type="checkbox" checked>Merge cell types</input> <span class="help" title="If you chose this option, you can download following information identified by using TFBSs or DHSs merged among cell types; genomic positions of HERV-TFBSs, HCREs, HERV-DHSs, and Gene Ontology (GO) associated with a particular kind of HCREs. If you don&#39;t choose this option, you can download above information separately in respective cell types.">?</span></br>
       </div>
       <div id="herv_menu"></div>
     </div>
