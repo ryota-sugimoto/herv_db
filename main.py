@@ -276,7 +276,7 @@ def tree_image(request, herv_name):
   return d
 
 def dl_hcre_format(l):
-  res = ["HERV\tTF\tChrom\tStart\tEnd\tMotif_Id\tMatched_motif\tMotif_source\tStart_position_in_consensus_seq\tEnd_position_in_consensus_seq"]
+  res = ["#HERV/LR_type\tTF\tMotif_Id\tMatched_motif\tMotif_source\tStart_position_in_consensus_seq\tEnd_position_in_consensus_seq"]
   for t in l:
     res.append("\t".join(str(i) for i in t))
   return "\n".join(res)
@@ -302,17 +302,17 @@ def dl_herv_tfbs_position(request, herv_name):
     tf_query = ' AND T.TF = "%s";' % (params["tf"],)
 
   if params["merge_cell_types"]:
-    query = 'SELECT HT.HERV, T.TF, P.Chrom, P.Start, P.End, P.Locus FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Position_HERV_TFBS_Merged AS P WHERE HT.HERV = "%s"' + tf_query
+    query = 'SELECT P.Chrom, P.Start, P.End, HT.HERV, T.TF, P.Locus FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Position_HERV_TFBS_Merged AS P WHERE HT.HERV = "%s"' + tf_query
   else:
-    query = 'SELECT HT.HERV, T.TF, P.Chrom, P.Start, P.End, P.Locus, D.Cell_name, D.Note, D.File_name FROM((HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Position_HERV_TFBS_in_each_cell AS P) NATURAL JOIN Dataset AS D WHERE HT.HERV = "%s"' + tf_query
+    query = 'SELECT P.Chrom, P.Start, P.End, HT.HERV, T.TF, P.Locus, D.Cell_name, D.Note, D.File_name FROM((HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Position_HERV_TFBS_in_each_cell AS P) NATURAL JOIN Dataset AS D WHERE HT.HERV = "%s"' + tf_query
 
   query %= (str(herv_name),)
   d = dbpool.runQuery(query)
   def dl_herv_tfbs_position_format(l):
     if params["merge_cell_types"]:
-      res = ["HERV\tTF\tChrom\tStart\tEnd\tHERV_locus"]
+      res = ["#Chrom\tStart\tEnd\tHERV/LR_type\tTF\tHERV/LR_locus"]
     else:
-      res = ["HERV\tTF\tChrom\tStart\tEnd\tHERV_locus\tCell\tNote\tTFBSs_source"]
+      res = ["#Chrom\tStart\tEnd\tHERV/LR_type\tTF\tHERV/LR_locus\tCell\tNote\tTFBSs_source"]
     for t in l:
       res.append("\t".join(str(i) for i in t))
     return "\n".join(res)
@@ -330,17 +330,17 @@ def dl_hcre_position(request, herv_name):
     tf_query = ' AND T.TF = "%s";' % (params["tf"],)
 
   if params["merge_cell_types"]:
-    query = 'SELECT HT.HERV, T.TF, P.Chrom, P.Start, P.End, P.Locus, P.Motif_Id, P.Motif_strand, P.Motif_pval, P.Match_sequence FROM((HCREs_Id AS HC NATURAL JOIN HERV_TFBS_Id AS HT) NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Position_HCREs AS P WHERE HT.HERV = "%s"' + tf_query
+    query = 'SELECT P.Chrom, P.Start, P.End, HT.HERV, T.TF, P.Locus, P.Motif_Id, P.Motif_strand, P.Motif_pval, P.Match_sequence FROM((HCREs_Id AS HC NATURAL JOIN HERV_TFBS_Id AS HT) NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Position_HCREs AS P WHERE HT.HERV = "%s"' + tf_query
   else:
-    query = 'SELECT HT.HERV, T.TF, P.Chrom, P.Start, P.End, P.Locus, P.Motif_Id, P.Motif_strand, P.Motif_pval, P.Match_sequence, D.Cell_name, D.Note, D.File_name FROM((((HCREs_Id AS HC NATURAL JOIN HERV_TFBS_Id AS HT) NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Position_HCREs AS P) NATURAL JOIN Mapping_HCREs_Dataset AS MP) NATURAL JOIN Dataset AS D WHERE HT.HERV = "%s"' + tf_query
+    query = 'SELECT P.Chrom, P.Start, P.End, HT.HERV, T.TF, P.Locus, P.Motif_Id, P.Motif_strand, P.Motif_pval, P.Match_sequence, D.Cell_name, D.Note, D.File_name FROM((((HCREs_Id AS HC NATURAL JOIN HERV_TFBS_Id AS HT) NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Position_HCREs AS P) NATURAL JOIN Mapping_HCREs_Dataset AS MP) NATURAL JOIN Dataset AS D WHERE HT.HERV = "%s"' + tf_query
 
   query %= (str(herv_name),)
   d = dbpool.runQuery(query)
   def dl_hcre_position_format(l):
     if params["merge_cell_types"]:
-      res = ["HERV\tTF\tChrom\tStart\tEnd\tHERV_locus\tMotif_Id\tMotif_strand\tMotif_P-value\tMatched_Sequence"]
+      res = ["#Chrom\tStart\tEnd\tHERV/LR_type\tTF\tHERV/LR_locus\tMotif_Id\tMotif_strand\tMotif_P-value\tMatched_Sequence"]
     else:
-      res = ["HERV\tTF\tChrom\tStart\tEnd\tHERV_locus\tMotif_Id\tMotif_strand\tMotif_P-value\tMatched_Sequence\tCell\tNote\tTFBSs_source"]
+      res = ["#Chrom\tStart\tEnd\tHERV/LR_type\tTF\tHERV/LR_locus\tMotif_Id\tMotif_strand\tMotif_P-value\tMatched_Sequence\tCell\tNote\tTFBSs_source"]
     for t in l:
       res.append("\t".join(str(i) for i in t))
     return "\n".join(res)
@@ -351,11 +351,11 @@ def dl_hcre_position(request, herv_name):
 def dl_dhs_position(request, herv_name):
   request.responseHeaders.addRawHeader("Content-Type", 
                                        "text/tab-separated-values")
-  query = 'SELECT P.HERV, P.Cell_name, P.Chrom, P.Start, P.End, P.Locus FROM Position_HERV_DHS AS P WHERE P.HERV = "%s";'
+  query = 'SELECT P.Chrom, P.Start, P.End, P.HERV, P.Cell_name, P.Locus FROM Position_HERV_DHS AS P WHERE P.HERV = "%s";'
   query %= (str(herv_name),)
   d = dbpool.runQuery(query)
   def dl_dhs_position_format(l):
-    res = ["HERV\tCell\tChrom\tStart\tEnd\tHERV_locus"]
+    res = ["#Chrom\tStart\tEnd\tHERV/LR_type\tCell\tHERV/LR_locus"]
     for t in l:
       res.append("\t".join(str(i) for i in t))
     return "\n".join(res)
@@ -369,18 +369,18 @@ def dl_ontology(request, herv_name):
   params = get_params(request)
   if params["tf"] != "all":
     if params["merge_cell_types"]:
-      header = "HERV\tTF\tGO_Id\tDescription\tP_value\tFDR\tFER\tFold_enrichment\tHit_number\tHit_gene_number\tHit_genes"
+      header = "#HERV/LR_type\tTF\tGO_Id\tDescription\tP_value\tFDR\tFER\tFold_enrichment\tHit_number\tHit_gene_number\tHit_genes"
       query = 'SELECT GO.HERV, T.TF, GO.GO_Id, GO.GO_description, GO.P_value, GO.FDR, GO.FER, GO.Fold_enrichment, GO.Hit_num, GO.Hit_gene_num, GO.HIT_genes FROM HCREs_GO_Merge AS GO NATURAL JOIN TFBS_Id AS T WHERE GO.HERV = "%s" AND T.TF = "%s" ;'
     else:
-      header = "HERV\tTF\tCell\tGO_Id\tDescription\tP_value\tFDR\tFER\tFold_enrichment\tNumber_of_hit_HCREs\tNumber_of_hit_genes\tHit_genes"
+      header = "#HERV/LR_type\tTF\tCell\tGO_Id\tDescription\tP_value\tFDR\tFER\tFold_enrichment\tNumber_of_hit_HCREs\tNumber_of_hit_genes\tHit_genes"
       query = 'SELECT GO.HERV, T.TF, GO.Cell_name, GO.GO_Id, GO.GO_description, GO.P_value, GO.FDR, GO.FER, GO.Fold_enrichment, GO.Hit_num, GO.Hit_gene_num, GO.HIT_genes FROM HCREs_GO_Each AS GO NATURAL JOIN TFBS_Id AS T WHERE GO.HERV = "%s" AND T.TF = "%s" ;'
     query %= (str(herv_name), params["tf"])
   else:
     if params["merge_cell_types"]:
-      header = "HERV\tTF\tGO_Id\tDescription\tP_value\tFDR\tFER\tFold_enrichment\tHit_number\tHit_gene_number\tHit_genes"
+      header = "#HERV/LR_type\tTF\tGO_Id\tDescription\tP_value\tFDR\tFER\tFold_enrichment\tHit_number\tHit_gene_number\tHit_genes"
       query = 'SELECT GO.HERV, T.TF, GO.GO_Id, GO.GO_description, GO.P_value, GO.FDR, GO.FER, GO.Fold_enrichment, GO.Hit_num, GO.Hit_gene_num, GO.HIT_genes FROM HCREs_GO_Merge AS GO NATURAL JOIN TFBS_Id AS T WHERE GO.HERV = "%s" ;'
     else:
-      header = "HERV\tTF\tCell\tGO_Id\tDescription\tP_value\tFDR\tFER\tFold_enrichment\tNumber_of_hit_HCREs\tNumber_of_hit_genes\tHit_genes"
+      header = "#HERV/LR_type\tTF\tCell\tGO_Id\tDescription\tP_value\tFDR\tFER\tFold_enrichment\tNumber_of_hit_HCREs\tNumber_of_hit_genes\tHit_genes"
       query = 'SELECT GO.HERV, T.TF, GO.Cell_name, GO.GO_Id, GO.GO_description, GO.P_value, GO.FDR, GO.FER, GO.Fold_enrichment, GO.Hit_num, GO.Hit_gene_num, GO.HIT_genes FROM HCREs_GO_Each AS GO NATURAL JOIN TFBS_Id AS T WHERE GO.HERV = "%s" ;'
     query %= (str(herv_name),)
   d = dbpool.runQuery(query)

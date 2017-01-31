@@ -92,10 +92,11 @@ div#help img { display: block;
                margin: auto;
                height: 600px; }
 
-div#help img:nth-of-type(1) { height: 80px; }
-div#help img:nth-of-type(2) { height: 80px; }
-div#help img:nth-of-type(4) { height: 200px; }
-div#help img:nth-of-type(5) { height: 400px; }
+div#help img:nth-of-type(1) { height: 60px; }
+div#help img:nth-of-type(2) { height: 60px; }
+div#help img:nth-of-type(3) { height: 800px; }
+div#help img:nth-of-type(4) { height: 180px; }
+div#help img:nth-of-type(5) { height: 300px; }
 
 div#help p.center { text-align: center; }
 sup {

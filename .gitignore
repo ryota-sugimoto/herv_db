@@ -2,3 +2,4 @@ sum_tables
 db_scripts
 graph_data
 plotly.min.js
+.DS_Store
