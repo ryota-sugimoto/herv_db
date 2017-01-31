@@ -449,4 +449,11 @@ def herv_list(request):
   d.addCallback(f)
   return d
 
-app.run("ilabws03.lab.nig.ac.jp", 8080)
+
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("host")
+parser.add_argument("port",type=int)
+args = parser.parse_args()
+
+app.run(args.host, args.port)
