@@ -1,2 +1,2 @@
 # herv_db
-http://hrev-tfbs.com/
+http://herv-tfbs.com/
