@@ -434,17 +434,15 @@ def herv_list(request):
   request.responseHeaders.addRawHeader("Content-Type",
                                        "application/json")
   params = get_params(request)
-  query = 'SELECT HT.HERV, count(HT.HERV) FROM HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T WHERE HT.HCREs REGEXP "%(hcre)s" AND T.Project REGEXP "%(db)s" AND HT.%(z_score_mode)s_based_Z_score >= %(z_score)s GROUP BY HT.HERV ;'
+  query = 'SELECT HT.HERV,T.TF FROM HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T WHERE HT.HCREs="%(hcre)s" AND T.Project REGEXP "%(db)s" AND HT.%(z_score_mode)s_based_z_score >= %(z_score)s;'
   query %= params
   d = dbpool.runQuery(query)
   def f(l):
-    res = []
-    for t in l:
-      d = {}
-      d["herv_name"] = t[0]
-      d["n"] = t[1]
-      res.append(d)
-    res = natsorted(res, key=lambda d: d["herv_name"])
+    res = {}
+    for herv,tf in l:
+      if herv not in res:
+        res[herv] = []
+      res[herv].append(tf)
     return json.dumps(res)
   d.addCallback(f)
   return d

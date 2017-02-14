@@ -1,5 +1,3 @@
-var graph_bgcolor = "beige";
-
 function Graphs(graphs) {
   this.graphs = graphs;
 }
@@ -48,69 +46,42 @@ function get_params() {
   return res
 }
 
-function update_herv_list(graphs) {
-  var div = document.getElementById("herv_menu");
+function create_herv_list(div) {
   while (div.firstChild) {
     div.removeChild(div.firstChild);
   }
+  var table = document.createElement("TABLE");
+  table.setAttribute("id", "herv_table");
+  div.appendChild(table);
   var params = get_params();
   var args = create_args_for_tfbs(params);
   var request = new XMLHttpRequest();
   request.open("GET", "/herv_list" + args, true);
   request.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
-      var hervs = JSON.parse(this.responseText);
-      var ul = document.createElement("ul");
-      ul.setAttribute("id", "herv_list");
-      function herv_list_onclick(event) {
-        var target = event.currentTarget;
-        var li = function () {
-          var tag = target;
-          while (tag.tagName!="LI") {
-            tag = tag.parentNode;
-          }
-          return tag;
-        }();
-        if (!li) { return; }
-
-        var ul = function () { 
-          var tag = target; 
-          while (tag.tagName!="UL") {
-            tag = tag.parentNode;
-          }
-          return tag;
-        }();
-        
-        for (var i=0; i<ul.children.length; i++) {
-          ul.children[i].style.backgroundColor = color;
-        }
-        li.style.backgroundColor = "cyan";
-      }
-      for (var i=0; i < hervs.length; i++) {
-        var herv_name = hervs[i]["herv_name"];
-        var n = hervs[i]["n"];
-        var li = document.createElement("LI");
-        li.setAttribute("id", herv_name);
-        li.style.display = "flex";
-        li.style.flexDirection = "row";
-        var herv_name_div = document.createElement("DIV");
+      var all_hervs = JSON.parse(this.responseText);
+      var data = [];
+      for (var herv_name in all_hervs) {
+        var tfs = all_hervs[herv_name];
+        var n = tfs.length;
+        //TODO add tf and db filter
         var a = document.createElement("A");
         a.href = "#!basic-info/"+herv_name;
         a.innerHTML = herv_name;
-        a.addEventListener("click", herv_list_onclick, false);
-        herv_name_div.appendChild(a);
-        herv_name_div.style.width = "200px";
-        var n_div = document.createElement("DIV");
-        n_div.innerHTML = n;
-        li.appendChild(herv_name_div);
-        li.appendChild(n_div);
-        if (graphs.current_herv_name == li.id) {
-          li.style.backgroundColor = "cyan";
-        }
-        ul.appendChild(li);
+        var tmp_div = document.createElement("DIV");
+        tmp_div.appendChild(a);
+        data.push({"herv_name": tmp_div.innerHTML, "n_tfbs":n});
       }
-      var color = ul.style.backgroundColor;
-      div.appendChild(ul);
+      var table = $("#herv_table").DataTable({
+        data: data,
+        scroller: true,
+        scrollY: "30vh",
+        paging: false,
+        columns: [{ title: "HERV",
+                    data: "herv_name" }, 
+                  { title: "# TFBS",
+                    data: "n_tfbs" }]
+      });
     }
   }
   request.send();
@@ -198,8 +169,7 @@ function tfbs_depth_graph(herv_name, params, div) {
       var layout = { title: "TFBS Depth",
                      xaxis: { title: "Position (nt)" },
                      yaxis: { title: "HERV-TFBSs (copy)" },
-                     showlegend: true,
-                     paper_bgcolor: graph_bgcolor};
+                     showlegend: true };
       Plotly.newPlot(div, data, layout);
     }
   }
@@ -221,7 +191,6 @@ function motif_depth_graph(herv_name, params, div) {
           var layout = { title: "Motif Depth",
                          xaxis: { title: "Position (nt)" },
                          yaxis: { title: "TF motif in HERV-TFBSs (copy)" },
-                         paper_bgcolor: graph_bgcolor,
                          showlegend: true,
                          hovermode: "closest",
                          hoverinfo: "y+name"};
@@ -244,8 +213,7 @@ function dhs_depth_graph(herv_name, params, div) {
       var layout = { title: "DHS Depth",
                      xaxis: { title: "Position (nt)" },
                      yaxis: { title: "HERV-DHSs (copy)" },
-                     showlegend: true,
-                     paper_bgcolor: graph_bgcolor};
+                     showlegend: true};
       Plotly.newPlot(div, data, layout);
     }
   }
@@ -260,8 +228,7 @@ function chromatin_state_graph(herv_name, params, div) {
       var data = JSON.parse(this.responseText);
       var layout = { title: "Chromatin State",
                      xaxis: { title: "" },
-                     yaxis: { title: "Proportion" },
-                     paper_bgcolor: graph_bgcolor};
+                     yaxis: { title: "Proportion" }};
       Plotly.newPlot(div, data, layout);
     }
   }
@@ -291,7 +258,6 @@ function ortholog_graph(herv_name, params, div) {
                      yaxis: { title: "",
                               ticks: "",
                               showticklabels: false },
-                     paper_bgcolor: graph_bgcolor,
                      autosize: false,
                      width: 500,
                      height: 590,
@@ -316,7 +282,6 @@ function tfbs_phylo_graph(herv_name, params, div) {
                      yaxis: { title: "",
                               ticks: "",
                               showticklabels: false },
-                     paper_bgcolor: graph_bgcolor,
                      autosize: false,
                      width: 500,
                      height: 590,
@@ -341,7 +306,6 @@ function motif_phylo_graph(herv_name, params, div) {
                      yaxis: { title: "",
                               ticks: "",
                               showticklabels: false },
-                     paper_bgcolor: graph_bgcolor,
                      autosize: false,
                      width: 750,
                      height: 590,
@@ -451,7 +415,7 @@ var graphs = new Graphs([{id: "tfbs_depth_graph", draw: tfbs_depth_graph},
                          {id: "ortholog_with_phylo", draw: ortholog_graph},
                          {id: "tfbs_with_phylo", draw: tfbs_phylo_graph},
                          {id: "motif_with_phylo", draw: motif_phylo_graph}]);
-update_herv_list(graphs);
+create_herv_list(document.getElementById("herv_menu"));
 if  (location.hash.substring(0,2) == "#!") {
   hash_change(null);
 }
