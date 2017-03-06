@@ -2,8 +2,9 @@
 <head>
 <title>dbHERV-REs</title>
 
-<link rel=stylesheet type="text/css" href="static/style.css"></link>
-<link type="text/css" rel="stylesheet" href="static/jquery-ui.min.css"></link>
+<link rel=stylesheet type="text/css" href="static/styles/style.css"></link>
+<link rel=stylesheet type="text/css"  href="static/styles/jquery-ui.min.css"></link>
+<link rel=stylesheet type="text/css" href="https://cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css"></link>
 <script   src="http://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
 <script src="http://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.1.1/js/dataTables.responsive.min.js"></script>
@@ -25,7 +26,8 @@ $(function() {
   </div>
   <div id="basic_info">
     <div id="left">
-      <div id="param_box">
+      <div id="parameters">
+      <div id="tfbs_hcre_param">
         <h4>Parameters for filtering HERV-TFBSs and HCREs</h4>
         Database:
         <select id="db1">
@@ -37,17 +39,22 @@ $(function() {
         
         <form id="z_score_mode">
           Statistical Thresholds: <span class="help" title="Note that a depth-based z score tends to be higher than a count-based z score, particularly in HERV/LR type whose length is long (such as internal sequence of HERV/LRs). See FAQs in Help page or our paper." >?</span></br>
-          <input type="radio" name="z_score_mode" value="Count" >Count-based permutation test</input></br>
-          <input type="radio" name="z_score_mode" value="Depth" checked>Depth-based permutation test</input></br>
+          <input type="radio" name="z_score_mode" value="count_based_z_score">Count-based permutation test</input></br>
+          <input type="radio" name="z_score_mode" value="depth_based_z_score" checked>Depth-based permutation test</input></br>
         </form>
         z score &gt;= <input id="z_score1" type="number" value="3" min="-1000" max="1000" step="0.1"></br>
         The upper limit of TFs shown in the graphs: <input id="limit1" type="number" value="10" min="1" max="100" step="1"></input>
+      </div>
+      <div id="dhs_param">
         <h4>Parameters for filtering HREV-DHSs</h4>
         <input id="represent" type="checkbox" name="represent" value="represent" checked>Only tier 1 and 2 cells</input> <span class="help" title="If you choose this option, the graph only shows HERV-DHSs in GM12878, H1-ES, K562, HepG2, HeLa S3, HUVEC, A549, and MCF7 cells, all of which are cllasified into ENCODE tier 1, 2, and a part of 2.5 cells." >?</span></br>
         z score &gt;= <input id="z_score2" type="number" value="3" min="-1000" max="1000" step="0.1"></br>
         The upper limit of TFs shown in the graph: <input id="limit2" type="number" value="10" min="1" max="100" step="1">
+      </div>
+      <div id="download_param">
         <h4>Parameters for download</h4>
         <input id="merge_cell_types" type="checkbox" checked>Merge cell types</input> <span class="help" title="If you chose this option, you can download the following information identified using TFBSs or DHSs that were merged among cell types; genomic positions of HERV-TFBSs, HCREs, HERV-DHSs, and Gene Ontology (GO) associated with a particular kind of HCREs. If you don&#39;t choose this option, you can download the above information separately in respective cell types." >?</span></br>
+      </div>
       </div>
       <div id="herv_menu"></div>
     </div>

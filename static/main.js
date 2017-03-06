@@ -1,24 +1,33 @@
 function Graphs(graphs) {
   this.graphs = graphs;
+  $(window).on("hashchange", this, function(e) {
+    var herv_name = location.hash.match(/^#!basic-info\/(.*)/m)[1];
+    if (herv_name) {
+      e.data.herv_name = herv_name;
+      e.data.draw(herv_name); 
+    }
+  });
+  function param_change(e) {
+    if (e.data.herv_name) {
+      e.data.draw(this.herv_name);
+    }
+  }
+  $("#tfbs_hcre_param").on("change", this, param_change);
+  $("#dhs_param").on("change", this, param_change);
 }
 
-Graphs.prototype.draw = function(herv_name, params) {
+Graphs.prototype.draw = function(herv_name) {
+  var params = get_params();
   var graphs = this.graphs;
-  var request = new XMLHttpRequest();
-  var intro_div = document.getElementById("introduction");
-  intro_div.style.display = "none";
-  var text_body = document.getElementById("text_body");
-  text_body.style.visivility = "visible";
-  text_body.style.display = "block";
-  var herv_name_elements = document.getElementsByClassName("herv_name");
-  for (i=0; i < herv_name_elements.length; i++) {
-    herv_name_elements[i].innerHTML = herv_name;
-  }
+  $("#introduction").css("display", "none");
+  $("#text_body").css("visivility", "visible");
+  $("#text_body").css("display", "block");
+  $(".herv_name").html(herv_name);
   for (var i=0; i<graphs.length; i++) {
     var div = document.getElementById(graphs[i].id);
     if (div) graphs[i].draw(herv_name, params, div);
   }
-}
+};
 
 function get_params() {
   var res = [];
@@ -46,47 +55,59 @@ function get_params() {
   return res
 }
 
-function create_herv_list(div) {
+function Herv_list(data, div) {
+  this.data = data;
+  this.data.table = {};
   while (div.firstChild) {
     div.removeChild(div.firstChild);
   }
-  var table = document.createElement("TABLE");
-  table.setAttribute("id", "herv_table");
-  div.appendChild(table);
-  var params = get_params();
-  var args = create_args_for_tfbs(params);
-  var request = new XMLHttpRequest();
-  request.open("GET", "/herv_list" + args, true);
-  request.onreadystatechange = function () {
-    if (this.readyState == 4 && this.status == 200) {
-      var all_hervs = JSON.parse(this.responseText);
-      var data = [];
-      for (var herv_name in all_hervs) {
-        var tfs = all_hervs[herv_name];
-        var n = tfs.length;
-        //TODO add tf and db filter
-        var a = document.createElement("A");
-        a.href = "#!basic-info/"+herv_name;
-        a.innerHTML = herv_name;
-        var tmp_div = document.createElement("DIV");
-        tmp_div.appendChild(a);
-        data.push({"herv_name": tmp_div.innerHTML, "n_tfbs":n});
-      }
-      var table = $("#herv_table").DataTable({
-        data: data,
-        scroller: true,
-        scrollY: "30vh",
-        paging: false,
-        columns: [{ title: "HERV",
-                    data: "herv_name" }, 
-                  { title: "# TFBS",
-                    data: "n_tfbs" }]
-      });
-    }
-  }
-  request.send();
+  var table_element = document.createElement("TABLE");
+  this.table_alement = table_element;
+  table_element.setAttribute("id", "herv_table");
+  table_element.setAttribute("class", "display compact");
+  div.appendChild(table_element);
+  //TODO add tf and db filter
+  this.dataTable = $("#herv_table").DataTable({
+    scroller: true,
+    scrollY: "28vh",
+    paging: false,
+    prosessing: true,
+    columns: [{ title: "HERV",
+                data: "herv_anchor"},
+              { title: "# TFBS",
+                data: "n_tfs"}]
+  });
+  this.update_table();
+  $("#tfbs_hcre_param").on("change", this.update_table());
 }
 
+Herv_list.prototype.update_table = function () {
+  function herv_anchor(o) {
+    return "<a href='#!basic-info/"+o.name+"'>"+o.name+"</a>"
+  }
+  
+  var z_min = Number($("#z_score1").val());
+  var hcre = $("#hcre1").prop("checked");
+  var mode= $("#z_score_mode")
+            .children("input[name=z_score_mode]:checked").val();
+  function n_tfs(o) {
+    var tfs = o.tfs;
+    if (hcre) {
+      return tfs.reduce(function(c,o) {
+            return Number(o[mode])>=z_min && o.hcre == "Yes" ? c+1 : c},0)
+    } else {
+      return tfs.reduce(function(c,o) {
+                           return Number(o[mode])>=z_min ? c+1 : c},
+                         0)
+    }
+  }
+  this.data.table = this.data.map(function(o) {
+    return({herv_anchor: herv_anchor(o),
+            n_tfs: n_tfs(o)}); });
+  
+  this.dataTable.clear().rows.add(this.data.table).draw();
+}
+  
 function hash_change(e) {
   var hash = location.hash;
   if (hash.substring(0,2) == "#!") {
@@ -112,10 +133,7 @@ function hash_change(e) {
 window.addEventListener("hashchange", hash_change);
 
 function hash_change_basic_info(herv_name) {
-  var params = get_params();
-  graphs.current_herv_name = herv_name;
-  graphs.draw(herv_name, params);
-  set_select_options(herv_name, params);
+  //set_select_options(herv_name, params);
 
   var request_info = new XMLHttpRequest();
   request_info.open("GET", "/info/"+herv_name, true);
@@ -129,18 +147,6 @@ function hash_change_basic_info(herv_name) {
   }
   request_info.send();
 }
-
-function param_change(event) {
-  update_herv_list(graphs);
-  var params = get_params();
-  if (graphs.current_herv_name) {
-    graphs.draw(graphs.current_herv_name, params);
-    set_select_options(graphs.current_herv_name, params);
-  }
-}
-var param_div = document.getElementById("param_box")
-param_div.addEventListener("change", param_change, false);
-
 
 function create_args_for_tfbs(params) {
   var res = "?db=" + params["db1"] + ";" + 
@@ -406,16 +412,20 @@ function set_select_options(herv_name, params) {
   dhs_anchor.setAttribute("download", herv_name+"_dhs"+".tsv");
 }
 
-var graphs = new Graphs([{id: "tfbs_depth_graph", draw: tfbs_depth_graph},
-                         {id: "motif_depth_graph", draw: motif_depth_graph},
-                         {id: "dhs_depth_graph", draw: dhs_depth_graph},
-                         {id: "chromatin_state_graph",
-                          draw: chromatin_state_graph},
-                         {id: "tree", draw: tree_graph},
-                         {id: "ortholog_with_phylo", draw: ortholog_graph},
-                         {id: "tfbs_with_phylo", draw: tfbs_phylo_graph},
-                         {id: "motif_with_phylo", draw: motif_phylo_graph}]);
-create_herv_list(document.getElementById("herv_menu"));
-if  (location.hash.substring(0,2) == "#!") {
-  hash_change(null);
-}
+$("document").ready(function () {
+  var graphs = new Graphs([{id: "tfbs_depth_graph", draw: tfbs_depth_graph},
+                           {id: "motif_depth_graph", draw: motif_depth_graph},
+                           {id: "dhs_depth_graph", draw: dhs_depth_graph},
+                           {id: "chromatin_state_graph",
+                            draw: chromatin_state_graph},
+                           {id: "tree", draw: tree_graph},
+                           {id: "ortholog_with_phylo", draw: ortholog_graph},
+                           {id: "tfbs_with_phylo", draw: tfbs_phylo_graph},
+                           {id: "motif_with_phylo", draw: motif_phylo_graph}]);
+  $.getJSON("/herv_list", function (data) {
+    var herv_list = new Herv_list(data,document.getElementById("herv_menu"));
+  });
+  if  (location.hash.substring(0,2) == "#!") {
+    $(window).trigger("hashchange");
+  }
+});

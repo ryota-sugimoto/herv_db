@@ -6,6 +6,7 @@ from twisted.enterprise import adbapi
 from natsort import natsorted
 from klein import Klein
 import json
+import zlib
 
 app = Klein()
 dbpool = adbapi.ConnectionPool("pymysql",
@@ -431,21 +432,25 @@ def herv_info(request, herv_name):
 
 @app.route("/herv_list")
 def herv_list(request):
-  request.responseHeaders.addRawHeader("Content-Type",
-                                       "application/json")
-  params = get_params(request)
-  query = 'SELECT HT.HERV,T.TF FROM HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T WHERE HT.HCREs="%(hcre)s" AND T.Project REGEXP "%(db)s" AND HT.%(z_score_mode)s_based_z_score >= %(z_score)s;'
-  query %= params
+  request.responseHeaders.addRawHeader("Content-Type", "application/json")
+  query = 'SELECT HT.HERV, T.TF, HT.Depth_based_z_score, HT.Count_based_z_score, HT.HCREs FROM HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T where HT.Depth_based_z_score >= 0 and HT.Count_based_z_score >=0'
   d = dbpool.runQuery(query)
   def f(l):
     res = {}
-    for herv,tf in l:
+    for herv,tf,d_z,c_z,hcre in l:
       if herv not in res:
         res[herv] = []
-      res[herv].append(tf)
-    return json.dumps(res)
+      res[herv].append({ "name": tf,
+                         "depth_based_z_score": d_z,
+                         "count_based_z_score": c_z,
+                         "hcre": hcre})
+    obj = []
+    for key in res:
+      obj.append({"name": key, "tfs": res[key]})
+    return json.dumps(obj)
   d.addCallback(f)
   return d
+
 
 
 import argparse
