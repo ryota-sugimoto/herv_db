@@ -3,16 +3,9 @@
 <title>dbHERV-REs</title>
 
 <link rel=stylesheet type="text/css" href="static/styles/style.css"></link>
-<link rel=stylesheet type="text/css"  href="static/styles/jquery-ui.min.css"></link>
+<link rel=stylesheet type="text/css"  href="plugins/jquery-ui/jquery-ui.min.css"></link>
 <link rel=stylesheet type="text/css" href="https://cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css"></link>
-<script   src="http://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
-<script src="http://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.1.1/js/dataTables.responsive.min.js"></script>
-<script type="text/javascript" src="static/jquery-ui.min.js"></script>
-<script type="text/javascript">
-$(function() {
-  $('.help').tooltip();
-});
+<link rel=stylesheet type="text/css" href="plugins/chosen_v1/chosen.min.css"></link>
 </script>
 </head>
 <body>
@@ -35,6 +28,7 @@ $(function() {
           <option value="Roadmap">Roadmap</option>
           <option value="ENCODE">ENCODE</option>
         </select></br>
+        Transcription factor: <select id="tf_select"></select></br>
         <input id="hcre1" type="checkbox" name="hcre" value="hcre" checked>Only TFs corresponding to HCREs</input></br>
         
         <form id="z_score_mode">
@@ -43,7 +37,7 @@ $(function() {
           <input type="radio" name="z_score_mode" value="depth_based_z_score" checked>Depth-based permutation test</input></br>
         </form>
         z score &gt;= <input id="z_score1" type="number" value="3" min="-1000" max="1000" step="0.1"></br>
-        The upper limit of TFs shown in the graphs: <input id="limit1" type="number" value="10" min="1" max="100" step="1"></input>
+        The upper limit of TFs shown in the graphs: <input id="limit1" type="number" value="10" min="1" max="100" step="1"></input></br>
       </div>
       <div id="dhs_param">
         <h4>Parameters for filtering HREV-DHSs</h4>
@@ -182,7 +176,12 @@ $(function() {
       </ul>
   </div>
 </div>
-<script src="static/plotly.min.js"></script>
+<script   src="http://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+<script src="http://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.1.1/js/dataTables.responsive.min.js"></script>
+<script src="plugins/jquery-ui/jquery-ui.min.js"></script>
+<script src="plugins/plotly/plotly.min.js"></script>
+<script src="plugins/chosen_v1/chosen.jquery.min.js"></script>
 <script src="static/main.js"></script>
 </body>
 </html>

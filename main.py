@@ -3,7 +3,6 @@
 
 from twisted.web.static import File
 from twisted.enterprise import adbapi
-from natsort import natsorted
 from klein import Klein
 import json
 import zlib
@@ -76,6 +75,10 @@ def get_params(request):
 @app.route("/static/", branch=True)
 def static(request):
   return File("./static")
+
+@app.route("/plugins/", branch=True)
+def plugins(request):
+  return File("./plugins")
 
 main_html = "".join(list(open("static/main.html")))
 @app.route("/")
@@ -430,10 +433,10 @@ def herv_info(request, herv_name):
   d.addCallback(f)
   return d
 
-@app.route("/herv_list")
-def herv_list(request):
+@app.route("/all_herv_list")
+def all_herv_list(request):
   request.responseHeaders.addRawHeader("Content-Type", "application/json")
-  query = 'SELECT HT.HERV, T.TF, HT.Depth_based_z_score, HT.Count_based_z_score, HT.HCREs FROM HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T where HT.Depth_based_z_score >= 0 and HT.Count_based_z_score >=0'
+  query = 'SELECT HT.HERV, T.TF, HT.Depth_based_z_score, HT.Count_based_z_score, HT.HCREs FROM HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T where HT.Depth_based_z_score >= 0 and HT.Count_based_z_score >= 0'
   d = dbpool.runQuery(query)
   def f(l):
     res = {}
@@ -443,15 +446,20 @@ def herv_list(request):
       res[herv].append({ "name": tf,
                          "depth_based_z_score": d_z,
                          "count_based_z_score": c_z,
-                         "hcre": hcre})
-    obj = []
-    for key in res:
-      obj.append({"name": key, "tfs": res[key]})
-    return json.dumps(obj)
+                         "hcre": True if hcre == "Yes" else False })
+    return json.dumps(res)
   d.addCallback(f)
   return d
 
-
+@app.route("/all_tf_list")
+def all_tf_list(request):
+  request.responseHeaders.addRawHeader("Content-Type", "application/json")
+  query = "SELECT T.TF FROM TFBS_Id AS T;"
+  d = dbpool.runQuery(query)
+  def f(l):
+    return json.dumps(sorted( t[0][2:] for t in l))
+  d.addCallback(f)
+  return d
 
 import argparse
 parser = argparse.ArgumentParser()

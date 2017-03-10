@@ -1,4 +1,4 @@
-body { background-color: ; }
+html { font-family: sans-serif !important; }
 
 div#menu a:visited { color: blue; }
 
@@ -48,8 +48,8 @@ div#parameters h4 { margin-top: 10px;
 form#z_score_mode { margin-bottom: 0px; }
 
 div#right { padding-left: 20px;
-            padding-right: 20px;
-            overflow: auto; }
+            padding-right: 20px; 
+            overflow: auto;}
 
 div#text_body { display: none; }
 
