@@ -74,13 +74,13 @@ function Herv_list(data, div) {
     order: [[1, "asc"]],
     paging: false,
     prosessing: true,
-    columns: [{ className: "details-control",
+    columns: [{ className: "details-control dt-body-center",
                 orderable: false,
-                data: null,
-                defaultContent: ""},
+                defaultContent: "&rarr;"},
               { title: "HERV",
                 data: "herv_anchor"},
               { title: "# TFBS",
+                className: "dt-body-right",
                 data: "n_tfs"}]
   });
   this.update_table();
@@ -99,10 +99,14 @@ function Herv_list(data, div) {
     tfs.sort(function (tf1,tf2) {
       return(tf2[mode] - tf1[mode]);
     });
+    var selected_tf = $("#tf_select").val();
     for (var i=0; i<tfs.length; i++) {
       var tf = tfs[i];
       if (tf.pass) {
         var tr = document.createElement("TR");
+        if (tf.name.substring(2) == selected_tf) {
+          $(tr).css("background","antiquewhite");
+        }
         $(tr).html("<td>"+tf.name+"</td>"
                +"<td>"+tf.count_based_z_score+"</td>"
                +"<td>"+tf.depth_based_z_score+"</td>");
@@ -115,9 +119,11 @@ function Herv_list(data, div) {
     var tr = $(this).closest("tr");
     var row = that.dataTable.row(tr);
     if (row.child.isShown()) {
+      $(this).html("&rarr;");
       row.child.hide();
       tr.removeClass("shown");
     } else {
+      $(this).html("&darr;");
       var tfs = row.data()["tfs"];
       row.child(child_table(tfs)).show();
       tr.addClass("shown");
@@ -174,34 +180,36 @@ Herv_list.prototype.update_table = function () {
     }
   });
   this.dataTable.clear().rows.add(filtered_table).draw();
+  $(".details-control").css("color", "blue");
+  
 }
   
 function hash_change(e) {
   var hash = location.hash;
   if (hash.substring(0,2) == "#!") {
     var hashpath = hash.substring(2);
-    var path1 = hashpath.split("/")[0]
-    if (path1 == "basic-info") {
+    var path = hashpath.split("/")[0]
+    if (path == "basic-info") {
       document.getElementById("basic_info").style.display = "flex";
       document.getElementById("download").style.display = "none";
       document.getElementById("help").style.display = "none";
       var herv_name = hashpath.split("/")[1]
       hash_change_basic_info(herv_name);
-    } else if (path1 == "download") {
+    } else if (path == "download") {
       document.getElementById("basic_info").style.display = "none";
       document.getElementById("download").style.display = "block";
       document.getElementById("help").style.display = "none";
-    } else if (path1 == "help") {
+    } else if (path == "help") {
       document.getElementById("basic_info").style.display = "none";
       document.getElementById("download").style.display = "none";
       document.getElementById("help").style.display= "block";
     }
   }
 }
-window.addEventListener("hashchange", hash_change);
+$(window).on("hashchange", hash_change);
 
 function hash_change_basic_info(herv_name) {
-  //set_select_options(herv_name, params);
+  set_select_options(herv_name);
 
   var request_info = new XMLHttpRequest();
   request_info.open("GET", "/info/"+herv_name, true);
@@ -391,7 +399,8 @@ function motif_phylo_graph(herv_name, params, div) {
   motif_request.send();
 }
 
-function set_select_options(herv_name, params) {
+function set_select_options(herv_name) {
+  var params = get_params();
   var tf_select_1 = document.getElementById("tf_select_1");
   var tf_select_2 = document.getElementById("tf_select_2");
   var tf_select_3 = document.getElementById("tf_select_3");
@@ -424,6 +433,7 @@ function set_select_options(herv_name, params) {
         tf_select_2.append(option_2);
         tf_select_3.append(option_3);
       }
+      
       if (params["merge_cell_types"]) {
          var merge = "true";
          var merged = "_merged";
@@ -442,6 +452,13 @@ function set_select_options(herv_name, params) {
       a3.setAttribute("download", herv_name + "all_ontology" + merged + ".tsv");
 
       function tf_select_1_change(event) {
+        if ($("#merge_cell_types").prop("checked")) {
+          var merge = "true";
+          var merged = "merged";
+        } else {
+          var merge = "false";
+          var marged = "";
+        }
         var tf = event.target.value;
         var anchor = document.getElementById(event.target.getAttribute("anchor_id"));
         anchor.setAttribute("href",
@@ -451,6 +468,13 @@ function set_select_options(herv_name, params) {
       }
       tf_select_1.addEventListener("change", tf_select_1_change, false);
       function tf_select_2_change(event) {
+        if ($("#merge_cell_types").prop("checked")) {
+          var merge = "true";
+          var merged = "merged";
+        } else {
+          var merge = "false";
+          var marged = "merged";
+        }
         var tf = event.target.value;
         var anchor = document.getElementById(event.target.getAttribute("anchor_id"));
         anchor.setAttribute("href",
@@ -460,6 +484,13 @@ function set_select_options(herv_name, params) {
       }
       tf_select_2.addEventListener("change", tf_select_2_change, false);
       function tf_select_3_change(event) {
+       if ($("#merge_cell_types").prop("checked")) {
+          var merge = "true";
+          var merged = "merged";
+        } else {
+          var merge = "false";
+          var marged = "merged";
+        } 
         var tf = event.target.value;
         var anchor = document.getElementById(event.target.getAttribute("anchor_id"));
         anchor.setAttribute("href",
@@ -480,6 +511,12 @@ function set_select_options(herv_name, params) {
   dhs_anchor.setAttribute("href", "/download/dhs_position/"+herv_name);
   dhs_anchor.setAttribute("download", herv_name+"_dhs"+".tsv");
 }
+$("#merge_cell_types").on("change", function () {
+  var herv_name = location.hash.match(/^#!basic-info\/(.*)/m)[1];
+  if (herv_name) {
+    set_select_options(herv_name);
+  }
+});
 
 $("document").ready(function () {
   var graphs = new Graphs([{id: "tfbs_depth_graph", draw: tfbs_depth_graph},

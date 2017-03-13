@@ -9,6 +9,8 @@ span.help { color: blue;
             text-decoration: underline; }
 span.help:hover { cursor: pointer; }
 
+.details-control:hover { cursor: pointer; }
+
 p.red { color: red; }
 
 a { text-decoration: none; }
@@ -90,3 +92,4 @@ div#help img:nth-of-type(5) { height: 300px; }
 div#help p.center { text-align: center; }
 sup { vertical-align: super;
       font-size: smaller; }
+
