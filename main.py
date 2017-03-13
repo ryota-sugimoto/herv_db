@@ -457,7 +457,7 @@ def all_tf_list(request):
   query = "SELECT T.TF FROM TFBS_Id AS T;"
   d = dbpool.runQuery(query)
   def f(l):
-    return json.dumps(sorted( t[0][2:] for t in l))
+    return json.dumps(sorted(set( t[0][2:] for t in l)))
   d.addCallback(f)
   return d
 
