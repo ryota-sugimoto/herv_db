@@ -438,7 +438,7 @@ def herv_info(request, herv_name):
 @app.route("/all_herv_list")
 def all_herv_list(request):
   request.responseHeaders.addRawHeader("Content-Type", "application/json")
-  query = 'SELECT HT.HERV, T.TF, HT.Depth_based_z_score, HT.Count_based_z_score, HT.HCREs FROM HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T where HT.Depth_based_z_score >= 0 and HT.Count_based_z_score >= 0'
+  query = 'SELECT HT.HERV, T.TF, HT.Depth_based_z_score, HT.Count_based_z_score, HT.HCREs FROM HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T where HT.Depth_based_z_score >= 0 or HT.Count_based_z_score >= 0'
   d = dbpool.runQuery(query)
   def f(l):
     res = {}
