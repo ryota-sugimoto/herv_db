@@ -36,12 +36,8 @@ function get_params() {
   res["db1"] = db_select.options[db_select.selectedIndex].value;
   res["hcre1"] = document.getElementById("hcre1").checked;
   
-  var z_score_mode_form = document.getElementById("z_score_mode");
-  for (var i=0, length=z_score_mode_form.children.length; i<length; i++) {
-    if (z_score_mode_form.children[i].checked) {
-      res["z_score_mode"] = z_score_mode_form.children[i].value;
-    }
-  }
+  res["z_score_mode"] = $("#z_score_mode")
+                        .children("input[name=z_score_mode]:checked").val();
   
   res["z_score1"] = document.getElementById("z_score1").value;
   res["limit1"] = document.getElementById("limit1").value;

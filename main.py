@@ -52,11 +52,13 @@ def get_params(request):
   else:
     d["representative"] = True
   
-  z_score_mode = request.args.get("z_score_mode", ["Count"])[0]
-  if z_score_mode == "Count" or z_score_mode == "Depth":
-    d["z_score_mode"] = z_score_mode
-  else:
+  z_score_mode = request.args.get("z_score_mode", ["depth_based_z_score"])[0]
+  if z_score_mode == "depth_based_z_score":
+    d["z_score_mode"] = "Depth"
+  elif z_score_mode == "count_based_z_score":
     d["z_score_mode"] = "Count"
+  else:
+    d["z_score_mode"] = "Depth"
   
 
   merge_cell_types = request.args.get("merge_cell_types", ["true"])[0]
