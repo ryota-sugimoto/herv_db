@@ -448,7 +448,7 @@ def all_herv_list(request):
       res[herv].append({ "name": tf,
                          "depth_based_z_score": d_z,
                          "count_based_z_score": c_z,
-                         "hcre": True if hcre == "Yes" else False })
+                         "hcre": hcre == "Yes" })
     return json.dumps(res)
   d.addCallback(f)
   return d
