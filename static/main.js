@@ -133,6 +133,8 @@ Herv_list.prototype.update_table = function () {
     return "<a href='#!basic-info/"+herv_name+"'>"+herv_name+"</a>"
   }
   
+  var use_recalled = $("#recalled").prop("checked");
+  var use_unique = $("#unique_reads").prop("checked");
   var z_min = Number($("#z_score1").val());
   var hcre = $("#hcre1").prop("checked");
   var mode = $("#z_score_mode")
@@ -143,13 +145,15 @@ Herv_list.prototype.update_table = function () {
     var res = 0
     for (i in tfs) {
       var tf = tfs[i];
-      var tf_db = tf.name.substring(0,2);
+      var tf_db = tf.project;
+      var tf_recalled = (tf.recalled == "True");
+      var tf_unique = tf.alignment == "unique"
       var cond1 = Number(tf[mode]) >= z_min;
       var cond2 = tf.hcre || !hcre;
-      var cond3 = (db == "Roadmap|ENCODE") 
-        || (db == "Roadmap" && tf_db == "R_") 
-        || (db == "ENCODE" && tf_db == "E_");
-      if (cond1 && cond2 && cond3) {
+      var cond3 = (db == "Roadmap|ENCODE") || (tf_db == db);
+      var cond4 = tf_recalled == use_recalled;
+      var cond5 = !use_recalled || tf_unique == use_unique;
+      if (cond1 && cond2 && cond3 && cond4 && cond5) {
         tf.pass = true;
         res += 1
       } else {

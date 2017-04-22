@@ -438,17 +438,21 @@ def herv_info(request, herv_name):
 @app.route("/all_herv_list")
 def all_herv_list(request):
   request.responseHeaders.addRawHeader("Content-Type", "application/json")
-  query = 'SELECT HT.HERV, T.TF, HT.Depth_based_z_score, HT.Count_based_z_score, HT.HCREs FROM HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T where HT.Depth_based_z_score >= 0 or HT.Count_based_z_score >= 0'
+  query = 'SELECT HT.HERV, T.TF, HT.Depth_based_z_score, HT.Count_based_z_score,HT.HCREs, Project, Recalled_peak, Used_read, Ratio_motif_TFBS_depth FROM HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T where (HT.Depth_based_z_score >= 0 or HT.Count_based_z_score >= 0) and Ratio_motif_TFBS_depth >= 0'
   d = dbpool.runQuery(query)
   def f(l):
     res = {}
-    for herv,tf,d_z,c_z,hcre in l:
+    for herv,tf,d_z,c_z,hcre,project,recalled,alignment,depth_ratio in l:
       if herv not in res:
         res[herv] = []
       res[herv].append({ "name": tf,
                          "depth_based_z_score": d_z,
                          "count_based_z_score": c_z,
-                         "hcre": hcre == "Yes" })
+                         "hcre": hcre == "Yes",
+                         "project": project,
+                         "recalled": recalled,
+                         "alignment": alignment,
+                         "depth_ratio": depth_ratio })
     return json.dumps(res)
   d.addCallback(f)
   return d
