@@ -87,16 +87,6 @@ main_html = "".join(list(open("static/main.html")))
 def pg_main_root(request):
   return main_html
 
-def convert_json(l):
-  res = []
-  for t in l:
-    d = {}
-    d["name"] = t[0]
-    d["y"] = map(int, t[1].split(","))
-    d["mode"] = "line"
-    res.append(d)
-  res.append({"name": "dummy", "y": [], "mode": "line", "showlegend": "False"})
-  return json.dumps(res)
 @app.route("/graph_data/tfbs_depth/<herv_name>")
 def tbfs_depth(request, herv_name):
   request.responseHeaders.addRawHeader("Content-Type", 
@@ -106,9 +96,40 @@ def tbfs_depth(request, herv_name):
   params["herv_name"] = str(herv_name)
   query %= params
   d = dbpool.runQuery(query)
+  def convert_json(l):
+    res = []
+    for t in l:
+      d = {}
+      d["name"] = t[0]
+      d["y"] = map(int, t[1].split(","))
+      d["mode"] = "line"
+      res.append(d)
+    return json.dumps(res)
   d.addCallback(convert_json)
   return d
-  
+
+@app.route("/graph_data/tfbs_depth_by_id")
+def tfbs_depth_by_id(request):
+  request.responseHeaders.addRawHeader("Content-Type", 
+                                       "application/json")
+  query = 'SELECT HT.HERV_TFBS_Id, HT.HERV, T.TF, D.Depth FROM (HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN TFBS_depth AS D WHERE HT.HERV_TFBS_Id in (%s);'
+  ids = request.args.get("id", [""])
+  query %= ",".join('"%s"' % s for s in ids)
+  d = dbpool.runQuery(query)
+  def convert_json(l):
+    res = []
+    for id,herv,tf,y in l:
+      d = {}
+      d["herv"] = herv
+      d["name"] = tf
+      d["id"] = id
+      d["y"] = map(int, y.split(","))
+      d["mode"] = "line"
+      res.append(d)
+    return json.dumps(res)
+  d.addCallback(convert_json)
+  return d
+
 @app.route("/graph_data/motif_depth/<herv_name>")
 def motif_depth(request, herv_name):
   request.responseHeaders.addRawHeader("Content-Type", 
@@ -118,6 +139,37 @@ def motif_depth(request, herv_name):
   params["herv_name"] = str(herv_name)
   query %= params
   d = dbpool.runQuery(query)
+  def convert_json(l):
+    res = []
+    for tf,y in l:
+      d = {}
+      d["name"] = tf
+      d["y"] = map(int, y.split(","))
+      d["mode"] = "line"
+      res.append(d)
+    return json.dumps(res)
+  d.addCallback(convert_json)
+  return d
+
+@app.route("/graph_data/motif_depth_by_id")
+def motif_depth_by_id(request):
+  request.responseHeaders.addRawHeader("Content-Type", 
+                                       "application/json")
+  query = 'SELECT HT.HERV_TFBS_Id, HT.HERV, T.TF, D.Depth FROM (HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Motif_depth AS D WHERE HT.HERV_TFBS_Id in (%s);'
+  ids = request.args.get("id", [""])
+  query %= ",".join('"%s"' % s for s in ids)
+  d = dbpool.runQuery(query)
+  def convert_json(l):
+    res = []
+    for id,herv,tf,y in l:
+      d = {}
+      d["herv"] = herv
+      d["name"] = tf
+      d["id"] = id
+      d["y"] = map(int, y.split(","))
+      d["mode"] = "line"
+      res.append(d)
+    return json.dumps(res)
   d.addCallback(convert_json)
   return d
 
@@ -144,15 +196,29 @@ def motif_depth_dot(request, herv_name):
   d.addCallback(f)
   return d
 
-def dhs_convert_json(l):
-  res = []
-  for t in l:
-    d = {}
-    d["name"] = t[0].replace("UniPk","")
-    d["y"] = [ int(i) for i in t[1].split(",") ]
-    d["mode"] = "line"
-    res.append(d)
-  return json.dumps(res)
+@app.route("/graph_data/motif_depth_dot_by_id")
+def motif_depth_dot_by_id(request):
+  request.responseHeaders.addRawHeader("Content-Type",
+                                       "application/json")
+  query = 'SELECT SQ.HERV, SQ.TF, M.Motif_Id, M.Start_in_consensus_seq, M.End_in_consensus_seq, SQ.Depth FROM Motif_Id AS M NATURAL JOIN (HCREs_Id AS HC NATURAL JOIN (SELECT * FROM((HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Motif_depth AS D) WHERE HT.HERV_TFBS_Id in (%s)) as SQ)'
+  ids = request.args.get("id", [""])
+  query %= ",".join('"%s"' % s for s in ids)
+  d = dbpool.runQuery(query)
+  def f(l):
+    res = []
+    for t in l:
+      d = {}
+      start,end = int(t[3]), int(t[4])
+      d["x"] = [int((start + end)/2.0)]
+      d["y"] = [int(max(t[5].split(",")[start:end]))*1.05]
+      d["mode"] = "markers"
+      d["name"] = t[1] + "_" + t[2]
+      res.append(d)
+    return json.dumps(res)
+  d.addCallback(f)
+  return d
+
+
 @app.route("/graph_data/dhs_depth/<herv_name>")
 def dhs_depth(request, herv_name):
   request.responseHeaders.addRawHeader("Content-Type", 
@@ -165,8 +231,18 @@ def dhs_depth(request, herv_name):
   params["herv_name"] = herv_name
   query %= params
   d = dbpool.runQuery(query)
+  def dhs_convert_json(l):
+    res = []
+    for t in l:
+      d = {}
+      d["name"] = t[0].replace("UniPk","")
+      d["y"] = [ int(i) for i in t[1].split(",") ]
+      d["mode"] = "line"
+      res.append(d)
+    return json.dumps(res)
   d.addCallback(dhs_convert_json)
   return d
+
 
 def chromatin_state_json(l):
   res = []
@@ -284,7 +360,7 @@ def tree_image(request, herv_name):
 def dl_hcre_format(l):
   res = ["#HERV/LR_type\tTF\tMotif_Id\tMatched_motif\tMotif_source\tStart_position_in_consensus_seq\tEnd_position_in_consensus_seq"]
   for t in l:
-    res.append("\t".join(str(i) for i in t))
+    res.append("\t".join(["%s"]*len(t))%t)
   return "\n".join(res)
 @app.route("/download/hcre/<herv_name>")
 def dl_hcre(request, herv_name):
@@ -325,6 +401,33 @@ def dl_herv_tfbs_position(request, herv_name):
   d.addCallback(dl_herv_tfbs_position_format)
   return d
 
+@app.route("/download/herv_tfbs_position_by_id")
+def dl_herv_tfbs_position_by_id(request):
+  request.responseHeaders.addRawHeader("Content-Type", 
+                                      "text/tab-separated-values")
+
+  merge = request.args.get("merge", "true") == "true"
+  ids = request.args.get("id", [""])
+  
+  if merge:
+    query = 'SELECT P.Chrom, P.Start, P.End, HT.HERV, T.TF, P.Locus FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Position_HERV_TFBS_Merged AS P WHERE HT.HERV_TFBS_Id in (%s);'
+  else:
+    query = 'SELECT P.Chrom, P.Start, P.End, HT.HERV, T.TF, P.Locus, D.Cell_name, D.Note, D.File_name FROM((HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Position_HERV_TFBS_in_each_cell AS P) NATURAL JOIN Dataset AS D WHERE HT.HERV_TFBS_ID in (%s);'
+
+  query %= ",".join('"%s"' % s for s in ids)
+  d = dbpool.runQuery(query)
+  def dl_herv_tfbs_position_format(l):
+    if merge:
+      res = ["#Chrom\tStart\tEnd\tHERV/LR_type\tTF\tHERV/LR_locus"]
+    else:
+      res = ["#Chrom\tStart\tEnd\tHERV/LR_type\tTF\tHERV/LR_locus\tCell\tNote\tTFBSs_source"]
+    for t in l:
+      res.append("\t".join(["%s"]*len(t))%t)
+    return "\n".join(res)
+  d.addCallback(dl_herv_tfbs_position_format)
+  return d
+
+
 @app.route("/download/hcre_position/<herv_name>")
 def dl_hcre_position(request, herv_name):
   request.responseHeaders.addRawHeader("Content-Type", 
@@ -352,6 +455,33 @@ def dl_hcre_position(request, herv_name):
     return "\n".join(res)
   d.addCallback(dl_hcre_format)
   return d
+
+@app.route("/download/hcre_position_by_id")
+def dl_hcre_position_by_id(request):
+  request.responseHeaders.addRawHeader("Content-Type", 
+                                      "text/tab-separated-values")
+
+  merge = request.args.get("merge", "true") == "true"
+  ids = request.args.get("id", [""])
+
+  if merge:
+    query = 'SELECT P.Chrom, P.Start, P.End, HT.HERV, T.TF, P.Locus, P.Motif_Id, P.Motif_strand, P.Motif_pval, P.Match_sequence FROM((HCREs_Id AS HC NATURAL JOIN HERV_TFBS_Id AS HT) NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Position_HCREs AS P WHERE HT.HERV_TFBS_Id in (%s);'
+  else:
+    query = 'SELECT P.Chrom, P.Start, P.End, HT.HERV, T.TF, P.Locus, P.Motif_Id, P.Motif_strand, P.Motif_pval, P.Match_sequence, D.Cell_name, D.Note, D.File_name FROM((((HCREs_Id AS HC NATURAL JOIN HERV_TFBS_Id AS HT) NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Position_HCREs AS P) NATURAL JOIN Mapping_HCREs_Dataset AS MP) NATURAL JOIN Dataset AS D WHERE HT.HERV_TFBS_Id in (%s);'
+
+  query %= ",".join('"%s"' % s for s in ids)
+  d = dbpool.runQuery(query)
+  def dl_hcre_position_format(l):
+    if merge:
+      res = ["#Chrom\tStart\tEnd\tHERV/LR_type\tTF\tHERV/LR_locus\tMotif_Id\tMotif_strand\tMotif_P-value\tMatched_Sequence"]
+    else:
+      res = ["#Chrom\tStart\tEnd\tHERV/LR_type\tTF\tHERV/LR_locus\tMotif_Id\tMotif_strand\tMotif_P-value\tMatched_Sequence\tCell\tNote\tTFBSs_source"]
+    for t in l:
+      res.append("\t".join(str(i) for i in t))
+    return "\n".join(res)
+  d.addCallback(dl_hcre_format)
+  return d
+
 
 @app.route("/download/dhs_position/<herv_name>")
 def dl_dhs_position(request, herv_name):
@@ -392,6 +522,26 @@ def dl_ontology(request, herv_name):
   d = dbpool.runQuery(query)
   d.addCallback(lambda l: "\n".join([header]+["\t".join(map(str,t)) for t in l]))
   return d
+
+@app.route("/download/ontology_by_id/<herv_name>")
+def dl_ontology_by_id(request, herv_name):
+  request.responseHeaders.addRawHeader("Content-Type",
+                                      "text/tab-separated-values")
+  tfs = request.args.get("id", [""])
+  print tfs
+  merge = request.args.get("merge", "true") == "true"
+  if merge:
+    header = "#HERV/LR_type\tTF\tGO_Id\tDescription\tP_value\tFDR\tFER\tFold_enrichment\tHit_number\tHit_gene_number\tHit_genes"
+    query = 'SELECT GO.HERV, T.TF, GO.GO_Id, GO.GO_description, GO.P_value, GO.FDR, GO.FER, GO.Fold_enrichment, GO.Hit_num, GO.Hit_gene_num, GO.HIT_genes FROM HCREs_GO_Merge AS GO NATURAL JOIN TFBS_Id AS T WHERE GO.HERV = "%s" and T.TF in (%s)'
+  else:
+    header = "#HERV/LR_type\tTF\tCell\tGO_Id\tDescription\tP_value\tFDR\tFER\tFold_enrichment\tNumber_of_hit_HCREs\tNumber_of_hit_genes\tHit_genes"
+    query = 'SELECT GO.HERV, T.TF, GO.Cell_name, GO.GO_Id, GO.GO_description, GO.P_value, GO.FDR, GO.FER, GO.Fold_enrichment, GO.Hit_num, GO.Hit_gene_num, GO.HIT_genes FROM HCREs_GO_Each AS GO NATURAL JOIN TFBS_Id AS T WHERE GO.HERV = "%s" and T.TF in (%s)'
+  query %= (str(herv_name), ",".join('"%s"' % s for s in tfs))
+  d = dbpool.runQuery(query)
+  d.addCallback(lambda l: "\n".join([header]+["\t".join(map(str,t)) for t in l]))
+  return d
+
+
 
 @app.route("/tf_list/<herv_name>")
 def tf_list(request, herv_name):
@@ -438,14 +588,15 @@ def herv_info(request, herv_name):
 @app.route("/all_herv_list")
 def all_herv_list(request):
   request.responseHeaders.addRawHeader("Content-Type", "application/json")
-  query = 'SELECT HT.HERV, T.TF, HT.Depth_based_z_score, HT.Count_based_z_score,HT.HCREs, Project, Recalled_peak, Used_read, Ratio_motif_TFBS_depth FROM HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T where (HT.Depth_based_z_score >= 0 or HT.Count_based_z_score >= 0) and Ratio_motif_TFBS_depth >= 0'
+  query = 'SELECT HT.HERV_TFBS_Id, HT.HERV, T.TF, HT.Depth_based_z_score, HT.Count_based_z_score,HT.HCREs, Project, Recalled_peak, Used_read, Ratio_motif_TFBS_depth FROM HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T where (HT.Depth_based_z_score >= 0 or HT.Count_based_z_score >= 0) and Ratio_motif_TFBS_depth >= 0'
   d = dbpool.runQuery(query)
   def f(l):
     res = {}
-    for herv,tf,d_z,c_z,hcre,project,recalled,alignment,depth_ratio in l:
+    for id,herv,tf,d_z,c_z,hcre,project,recalled,alignment,depth_ratio in l:
       if herv not in res:
         res[herv] = []
-      res[herv].append({ "name": tf,
+      res[herv].append({ "id": id,
+                         "name": tf,
                          "depth_based_z_score": d_z,
                          "count_based_z_score": c_z,
                          "hcre": hcre == "Yes",
@@ -466,6 +617,7 @@ def all_tf_list(request):
     return json.dumps(sorted(set( t[0][2:] for t in l)))
   d.addCallback(f)
   return d
+
 
 import argparse
 parser = argparse.ArgumentParser()

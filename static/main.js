@@ -67,7 +67,7 @@ function Herv_list(data, div) {
     scroller: true,
     scrollY: "25vh",
     scrollCollapse: true,
-    order: [[1, "asc"]],
+    order: [[2, "des"]],
     paging: false,
     prosessing: true,
     columns: [{ className: "details-control dt-body-center",
@@ -79,6 +79,7 @@ function Herv_list(data, div) {
                 className: "dt-body-right",
                 data: "n_tfs"}]
   });
+  $("#herv_table").data("herv_list", this);
   this.update_table();
   $("#tfbs_hcre_param").on("change", function(e) {that.update_table();});
   
@@ -181,9 +182,21 @@ Herv_list.prototype.update_table = function () {
   });
   this.dataTable.clear().rows.add(filtered_table).draw();
   $(".details-control").css("color", "blue");
-  
 }
   
+Herv_list.prototype.passed_tfbs = function(herv) {
+  var id = [];
+  var name = [];
+  for (i in this.data[herv]) {
+    var tf = this.data[herv][i];
+    if (tf.pass) {
+      name.push(tf.name); 
+      id.push(tf.id);
+    }
+  }
+  return({name: name, id:id});
+}
+
 function hash_change(e) {
   var hash = location.hash;
   if (hash.substring(0,2) == "#!") {
@@ -241,49 +254,39 @@ function create_args_for_dhs(params) {
   return res
 }
 
+function id_arg(ids) {
+  return("?"+ids.map(function (s) {return("id="+s)}).join(";"))
+}
+
 function tfbs_depth_graph(herv_name, params, div) {
-  var args = create_args_for_tfbs(params);
-  var request = new XMLHttpRequest();
-  request.open("GET", "graph_data/tfbs_depth/"+herv_name+args, true)
-  request.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      var data = JSON.parse(this.responseText);
-      var layout = { title: "TFBS Depth",
-                     xaxis: { title: "Position (nt)" },
-                     yaxis: { title: "HERV-TFBSs (copy)" },
-                     width: "100%",
-                     showlegend: true };
-      Plotly.newPlot(div, data, layout);
-    }
-  }
-  request.send();
+  var args = id_arg($("#herv_table").data("herv_list")
+                   .passed_tfbs(herv_name).id);
+  $.getJSON("graph_data/tfbs_depth_by_id"+args, function (data) {
+    var layout = { title: "TFBS Depth",
+                   xaxis: { title: "Position (nt)" },
+                   yaxis: { title: "HERV-TFBSs (copy)" },
+                   width: "100%",
+                   showlegend: true };
+    Plotly.newPlot(div, data, layout);
+  });
 }
 
 function motif_depth_graph(herv_name, params, div) {
-  var args = create_args_for_tfbs(params);
-  var request = new XMLHttpRequest();
-  request.open("GET", "graph_data/motif_depth/"+herv_name+args, true)
-  request.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      var line_data = JSON.parse(this.responseText);
-      var request_dot = new XMLHttpRequest();
-      request_dot.open("GET", "graph_data/motif_depth_dot/"+herv_name+args, true);
-      request_dot.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          var dot_data = JSON.parse(this.responseText);
-          var layout = { title: "Motif Depth",
-                         xaxis: { title: "Position (nt)" },
-                         yaxis: { title: "TF motif in HERV-TFBSs (copy)" },
-                         showlegend: true,
-                         hovermode: "closest",
-                         hoverinfo: "y+name"};
-          Plotly.newPlot(div, line_data.concat(dot_data), layout);
-        }
-      }
-      request_dot.send();
-    }
-  }
-  request.send();
+  var args = id_arg($("#herv_table").data("herv_list")
+                   .passed_tfbs(herv_name).id);
+  var layout = { title: "Motif Depth",
+                 xaxis: { title: "Position (nt)" },
+                 yaxis: { title: "TF motif in HERV-TFBSs (copy)" },
+                 showlegend: true,
+                 hovermode: "closest",
+                 hoverinfo: "y+name"};
+  Plotly.newPlot(div,[], layout);
+  $.getJSON("graph_data/motif_depth_by_id"+args, function (data) {
+    Plotly.addTraces(div, data);
+  });
+  $.getJSON("graph_data/motif_depth_dot_by_id"+args, function (data) {
+    Plotly.addTraces(div, data);
+  });
 }
 
 function dhs_depth_graph(herv_name, params, div) {
@@ -400,7 +403,6 @@ function motif_phylo_graph(herv_name, params, div) {
 }
 
 function set_select_options(herv_name) {
-  var params = get_params();
   var tf_select_1 = document.getElementById("tf_select_1");
   var tf_select_2 = document.getElementById("tf_select_2");
   var tf_select_3 = document.getElementById("tf_select_3");
@@ -413,95 +415,141 @@ function set_select_options(herv_name) {
   while (tf_select_3.length > 1) {
     tf_select_3.removeChild(tf_select_3.lastChild);
   }
-  var args = create_args_for_tfbs(params)
-  var request = new XMLHttpRequest();
-  request.open("GET", "tf_list/"+herv_name+args, true);
-  request.onreadystatechange = function () {
-    if (this.readyState == 4 && this.status == 200) {
-      var tf_list = JSON.parse(this.responseText);
-      for (var i=0; i<tf_list.length; i++) {
-        var option_1 = document.createElement("option");
-        var option_2 = document.createElement("option");
-        var option_3 = document.createElement("option");
-        option_1.value = tf_list[i];
-        option_2.value = tf_list[i];
-        option_3.value = tf_list[i];
-        option_1.innerHTML = tf_list[i];
-        option_2.innerHTML = tf_list[i];
-        option_3.innerHTML = tf_list[i];
-        tf_select_1.append(option_1);
-        tf_select_2.append(option_2);
-        tf_select_3.append(option_3);
-      }
-      
-      if (params["merge_cell_types"]) {
-         var merge = "true";
-         var merged = "_merged";
-      } else {
-         var merge = "false";
-         var merged = "";
-      }
-      var a1 = document.getElementById(tf_select_1.getAttribute("anchor_id"));
-      a1.setAttribute("href", "/download/herv_tfbs_position/"+herv_name+"?tf=all;merge_cell_types="+merge+";");
-      a1.setAttribute("download", herv_name + "_all_tfbs" + merged + ".tsv");
-      var a2 = document.getElementById(tf_select_2.getAttribute("anchor_id"));
-      a2.setAttribute("href", "/download/hcre_position/"+herv_name+"?tf=all;merge_cell_types="+merge+";");
-      a2.setAttribute("download", herv_name + "_all_hcre" + merged + ".tsv");
-      var a3 = document.getElementById(tf_select_3.getAttribute("anchor_id"));
-      a3.setAttribute("href", "/download/ontology/"+herv_name+"?tf=all;merge_cell_types="+merge+";");
-      a3.setAttribute("download", herv_name + "all_ontology" + merged + ".tsv");
-
-      function tf_select_1_change(event) {
-        if ($("#merge_cell_types").prop("checked")) {
-          var merge = "true";
-          var merged = "merged";
-        } else {
-          var merge = "false";
-          var marged = "";
-        }
-        var tf = event.target.value;
-        var anchor = document.getElementById(event.target.getAttribute("anchor_id"));
-        anchor.setAttribute("href",
-                            "/download/herv_tfbs_position/"+herv_name+"?tf="+tf+";merge_cell_types="+merge+";");
-        anchor.setAttribute("download",
-                            herv_name + "_" + tf + "_tfbs" + merged + ".tsv");
-      }
-      tf_select_1.addEventListener("change", tf_select_1_change, false);
-      function tf_select_2_change(event) {
-        if ($("#merge_cell_types").prop("checked")) {
-          var merge = "true";
-          var merged = "merged";
-        } else {
-          var merge = "false";
-          var marged = "merged";
-        }
-        var tf = event.target.value;
-        var anchor = document.getElementById(event.target.getAttribute("anchor_id"));
-        anchor.setAttribute("href",
-                            "/download/hcre_position/"+herv_name+"?tf="+tf+";merge_cell_types="+merge+";");
-        anchor.setAttribute("download",
-                            herv_name + "_" + tf + "_hcre" + merged + ".tsv");
-      }
-      tf_select_2.addEventListener("change", tf_select_2_change, false);
-      function tf_select_3_change(event) {
-       if ($("#merge_cell_types").prop("checked")) {
-          var merge = "true";
-          var merged = "merged";
-        } else {
-          var merge = "false";
-          var marged = "merged";
-        } 
-        var tf = event.target.value;
-        var anchor = document.getElementById(event.target.getAttribute("anchor_id"));
-        anchor.setAttribute("href",
-                            "/download/ontology/"+herv_name+"?tf="+tf+";merge_cell_types="+merge+";");
-        anchor.setAttribute("download",
-                            herv_name + "_" + tf + "_ontology" + merged + ".tsv");
-      }
-      tf_select_3.addEventListener("change", tf_select_3_change, false);
-    }
+  var tf_list = $("#herv_table").data("herv_list").passed_tfbs(herv_name)
+  for (var i=0; i<tf_list.id.length; i++) {
+    var tf_name = tf_list.name[i];
+    var tf_id = tf_list.id[i]
+    var option_1 = document.createElement("option");
+    var option_2 = document.createElement("option");
+    var option_3 = document.createElement("option");
+    option_1.value = tf_id;
+    option_2.value = tf_id;
+    option_3.value = tf_name;
+    option_1.setAttribute("name", tf_name);
+    option_2.setAttribute("name", tf_name);
+    option_3.setAttribute("name", tf_name);
+    option_1.innerHTML = tf_name;
+    option_2.innerHTML = tf_name;
+    option_3.innerHTML = tf_name;
+    tf_select_1.append(option_1);
+    tf_select_2.append(option_2);
+    tf_select_3.append(option_3);
   }
-  request.send();
+  
+  var all_tf_arg = id_arg($("#herv_table").data("herv_list")
+                  .passed_tfbs(herv_name).id);
+  if ($("#merge_cell_types").prop("checked")) {
+    var merge_arg = ";merge=" + "true";
+    var merged = "_merged";
+  } else {
+    var merge_arg = ";merge=" + "false";
+    var merged = "";
+  }
+  
+  var a1 = document.getElementById(tf_select_1.getAttribute("anchor_id"));
+  a1.setAttribute("href", "/download/herv_tfbs_position_by_id" 
+                          + all_tf_arg
+                          + merge_arg);
+  a1.setAttribute("download", herv_name + "_all_tfbs" + merged + ".tsv");
+  var a2 = document.getElementById(tf_select_2.getAttribute("anchor_id"));
+  a2.setAttribute("href", "/download/hcre_position_by_id"
+                          + all_tf_arg
+                          + merge_arg);
+  a2.setAttribute("download", herv_name + "_all_hcre" + merged + ".tsv");
+  
+  var all_tf_name_arg = id_arg($("#herv_table").data("herv_list")
+                               .passed_tfbs(herv_name).name);
+  var a3 = document.getElementById(tf_select_3.getAttribute("anchor_id"));
+  a3.setAttribute("href", "/download/ontology_by_id/"
+                          + herv_name
+                          + all_tf_name_arg
+                          + merge_arg);
+  a3.setAttribute("download", herv_name + "all_ontology" + merged + ".tsv");
+
+  $(tf_select_1).on("change", function () {
+    if ($("#merge_cell_types").prop("checked")) {
+      var merge_arg = ";merge=" + "true";
+      var merged = "_merged";
+    } else {
+      var merge_arg = ";merge=" + "false";
+      var merged = "";
+    }
+    var tf_id = this.value;
+    if (tf_id == "all") {
+      var tf_arg = id_arg($("#herv_table").data("herv_list")
+                          .passed_tfbs(herv_name).id);
+      var tf_name = "all";
+    } else {
+      var tf_arg = "?id=" + tf_id;
+      var tf_name = this.name;
+    }
+    var anchor = document.getElementById(this.getAttribute("anchor_id"));
+    anchor.setAttribute("href",
+                        "/download/herv_tfbs_position_by_id"
+                        + tf_arg
+                        + merge_arg);
+    anchor.setAttribute("download",
+                        herv_name 
+                        + "_" + tf_name 
+                        + "_tfbs" + merged + ".tsv");
+  });
+
+  $(tf_select_2).on("change", function () {
+    if ($("#merge_cell_types").prop("checked")) {
+      var merge_arg = ";merge=" + "true";
+      var merged = "_merged";
+    } else {
+      var merge_arg = ";merge=" + "false";
+      var merged = "";
+    }
+    var tf_id = this.value;
+    if (tf_id == "all") {
+      var tf_arg = id_arg($("#herv_table").data("herv_list")
+                          .passed_tfbs(herv_name).id);
+      var tf_name = "all";
+    } else {
+      var tf_arg = "?id=" + tf_id;
+      var tf_name = this.name;
+    }
+    var anchor = document.getElementById(this.getAttribute("anchor_id"));
+    anchor.setAttribute("href",
+                        "/download/hcre_position_by_id"
+                        + tf_arg
+                        + merge_arg);
+    anchor.setAttribute("download",
+                        herv_name 
+                        + "_" + tf_name 
+                        + "_hcre" + merged + ".tsv");
+  });
+  
+  $(tf_select_3).on("change", function () {
+    if ($("#merge_cell_types").prop("checked")) {
+      var merge_arg = ";merge=" + "true";
+      var merged = "_merged";
+    } else {
+      var merge_arg = ";merge=" + "false";
+      var merged = "";
+    }
+    var tf_id = this.value;
+    if (tf_id == "all") {
+      var tf_arg = id_arg($("#herv_table").data("herv_list")
+                          .passed_tfbs(herv_name).name);
+      var tf_name = "all";
+    } else {
+      var tf_arg = "?id=" + this.value;
+      var tf_name = this.value;
+    }
+    var anchor = document.getElementById(this.getAttribute("anchor_id"));
+    anchor.setAttribute("href",
+                        "/download/ontology_by_id/"
+                        + herv_name
+                        + tf_arg
+                        + merge_arg);
+    anchor.setAttribute("download",
+                        herv_name 
+                        + "_" + tf_name 
+                        + "_ontology" + merged + ".tsv");
+  });
 
   var hcre_anchor = document.getElementById("dl_hcre");
   hcre_anchor.setAttribute("href", "/download/hcre/"+herv_name);
@@ -519,34 +567,36 @@ $("#merge_cell_types").on("change", function () {
 });
 
 $("document").ready(function () {
-  var graphs = new Graphs([{id: "tfbs_depth_graph", draw: tfbs_depth_graph},
-                           {id: "motif_depth_graph", draw: motif_depth_graph},
-                           {id: "dhs_depth_graph", draw: dhs_depth_graph},
-                           {id: "chromatin_state_graph",
-                            draw: chromatin_state_graph},
-                           {id: "tree", draw: tree_graph},
-                           {id: "ortholog_with_phylo", draw: ortholog_graph},
-                           {id: "tfbs_with_phylo", draw: tfbs_phylo_graph},
-                           {id: "motif_with_phylo", draw: motif_phylo_graph}]);
   $.getJSON("/all_herv_list", function (data) {
     var herv_list = new Herv_list(data,$("#herv_menu"));
+  })
+  .done(function () {
+    var graphs = new Graphs([{id: "tfbs_depth_graph", draw: tfbs_depth_graph},
+                             {id: "motif_depth_graph", draw: motif_depth_graph},
+                             {id: "dhs_depth_graph", draw: dhs_depth_graph},
+                             {id: "chromatin_state_graph",
+                              draw: chromatin_state_graph},
+                             {id: "tree", draw: tree_graph},
+                             {id: "ortholog_with_phylo", draw: ortholog_graph},
+                             {id: "tfbs_with_phylo", draw: tfbs_phylo_graph},
+                             {id: "motif_with_phylo", draw: motif_phylo_graph}])
+    $.getJSON("/all_tf_list", function (data) {
+      $("#tf_select").html(function () {
+        var option = document.createElement("OPTION");
+        $(option).val("").html("");
+        this.append(option);
+        for (i in data) {
+          var option = document.createElement("OPTION");
+          $(option).val(data[i]).html(data[i]);
+          this.append(option);
+         }
+      }).chosen({ placeholder_text_single: "All",
+                  allow_single_deselect: true,
+                  width: "150px"});
+    });
+    if  (location.hash.substring(0,2) == "#!") {
+      $(window).trigger("hashchange");
+    }
+    $(".help").tooltip();
   });
-  $.getJSON("/all_tf_list", function (data) {
-     $("#tf_select").html(function () {
-       var option = document.createElement("OPTION");
-       $(option).val("").html("");
-       this.append(option);
-       for (i in data) {
-         var option = document.createElement("OPTION");
-         $(option).val(data[i]).html(data[i]);
-         this.append(option);
-       }
-     }).chosen({ placeholder_text_single: "All",
-                 allow_single_deselect: true,
-                 width: "150px"});
-  });
-  if  (location.hash.substring(0,2) == "#!") {
-    $(window).trigger("hashchange");
-  }
-  $(".help").tooltip();
 });
