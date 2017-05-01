@@ -528,7 +528,6 @@ def dl_ontology_by_id(request, herv_name):
   request.responseHeaders.addRawHeader("Content-Type",
                                       "text/tab-separated-values")
   tfs = request.args.get("id", [""])
-  print tfs
   merge = request.args.get("merge", "true") == "true"
   if merge:
     header = "#HERV/LR_type\tTF\tGO_Id\tDescription\tP_value\tFDR\tFER\tFold_enrichment\tHit_number\tHit_gene_number\tHit_genes"
