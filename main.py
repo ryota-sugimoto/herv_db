@@ -317,6 +317,17 @@ def TFBS_phylogeny_graph(request, herv_name):
   d.addCallback(TFBS_map_json)
   return d
 
+@app.route("/graph_data/TFBS_phylogeny_by_id")
+def TFBS_phylogeny_by_id(request):
+  request.responseHeaders.addRawHeader("Content-Type", 
+                                       "application/json")
+  query = "SELECT T.TF, TB.TF_binding FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN TFBS_with_phylogeny AS TB where HT.HERV_TFBS_Id in (%s);"
+  ids = request.args.get("id", [""])
+  query %= ",".join('"%s"' % s for s in ids)
+  d = dbpool.runQuery(query)
+  d.addCallback(TFBS_map_json)
+  return d
+
 def motif_map_json(t):
   res = { "type": "heatmap",
           "colorscale": [[0, "black"], [10**(-4)-10**(-10), "black"],
@@ -587,14 +598,14 @@ def herv_info(request, herv_name):
 @app.route("/all_herv_list")
 def all_herv_list(request):
   request.responseHeaders.addRawHeader("Content-Type", "application/json")
-  query = 'SELECT HT.HERV_TFBS_Id, HT.HERV, T.TF, HT.Depth_based_z_score, HT.Count_based_z_score,HT.HCREs, Project, Recalled_peak, Used_read, Ratio_motif_TFBS_depth FROM HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T where (HT.Depth_based_z_score >= 0 or HT.Count_based_z_score >= 0) and Ratio_motif_TFBS_depth >= 0'
+  query = "SELECT HT.HERV_TFBS_Id, HT.HERV, T.TF, HT.Depth_based_z_score, HT.Count_based_z_score, HT.HCREs, Project, Recalled_peak, Used_read, Ratio_motif_TFBS_depth, HV.Integration_date FROM HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T NATURAL JOIN HERVs as HV where (HT.Depth_based_z_score >= 0 or HT.Count_based_z_score >= 0) and Ratio_motif_TFBS_depth >= 0;"
   d = dbpool.runQuery(query)
   def f(l):
     res = {}
-    for id,herv,tf,d_z,c_z,hcre,project,recalled,alignment,depth_ratio in l:
+    for id,herv,tf,d_z,c_z,hcre,project,recalled,alignment,depth_ratio,int_date in l:
       if herv not in res:
-        res[herv] = []
-      res[herv].append({ "id": id,
+        res[herv] = {"tfs": [], "integration_date": int_date}
+      res[herv]["tfs"].append({ "id": id,
                          "name": tf,
                          "depth_based_z_score": d_z,
                          "count_based_z_score": c_z,
@@ -602,7 +613,7 @@ def all_herv_list(request):
                          "project": project,
                          "recalled": recalled,
                          "alignment": alignment,
-                         "depth_ratio": depth_ratio })
+                         "depth_ratio": depth_ratio})
     return json.dumps(res)
   d.addCallback(f)
   return d

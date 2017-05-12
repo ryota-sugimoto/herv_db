@@ -45,7 +45,6 @@ function get_params() {
   var db_select = document.getElementById("db2");
   res["representative"] = document.getElementById("represent").checked;
   res["z_score2"] = document.getElementById("z_score2").value;
-  res["limit2"] = document.getElementById("limit2").value;
 
   res["merge_cell_types"] = document.getElementById("merge_cell_types").checked;
   
@@ -75,6 +74,8 @@ function Herv_list(data, div) {
                 defaultContent: "&rarr;"},
               { title: "HERV",
                 data: "herv_anchor"},
+              { title: "Integration date",
+                data: "integration_date"},
               { title: "# TFBS",
                 className: "dt-body-right",
                 data: "n_tfs"}]
@@ -167,8 +168,9 @@ Herv_list.prototype.update_table = function () {
   for (var herv_name in this.data) {
     table.push({herv_anchor: herv_anchor(herv_name),
                 herv_name: herv_name,
-                n_tfs: n_tfs(this.data[herv_name]),
-                tfs: this.data[herv_name]});
+                integration_date: this.data[herv_name].integration_date,
+                n_tfs: n_tfs(this.data[herv_name].tfs),
+                tfs: this.data[herv_name].tfs});
   }
   var filtered_table = table.filter(function (o) {
     var passed_tfs = o.tfs.filter(function (tf) { return(tf.pass) })
@@ -185,13 +187,21 @@ Herv_list.prototype.update_table = function () {
 }
   
 Herv_list.prototype.passed_tfbs = function(herv) {
+  var mode = $("#z_score_mode")
+            .children("input[name=z_score_mode]:checked").val();
+  var tfs = this.data[herv].tfs;
+  tfs.sort(function(a,b) {
+    return(b[mode] - a[mode]);
+  });
+  var limit = Number($("#limit1").val());
   var id = [];
   var name = [];
-  for (i in this.data[herv]) {
-    var tf = this.data[herv][i];
+  for (var i=0,n=0; i<tfs.length && n<limit; i++){
+    var tf = tfs[i];
     if (tf.pass) {
       name.push(tf.name); 
       id.push(tf.id);
+      n++;
     }
   }
   return({name: name, id:id});
@@ -249,8 +259,7 @@ function create_args_for_tfbs(params) {
 function create_args_for_dhs(params) {
   var res = "?db=" + params["db2"] + ";" + 
             "representative=" + params["representative"] + ";" + 
-            "z_score=" + params["z_score2"] + ";" + 
-            "limit=" + params["limit2"] + ";";
+            "z_score=" + params["z_score2"] + ";";
   return res
 }
 
@@ -328,6 +337,7 @@ function tree_graph(herv_name, params, div) {
   var tree_img = document.createElement("img");
   div.appendChild(tree_img);
   tree_img.setAttribute("src", "/image/tree/"+herv_name);
+  tree_img.setAttribute("alt", "NA");
 }
 
 function ortholog_graph(herv_name, params, div) {
@@ -355,27 +365,22 @@ function ortholog_graph(herv_name, params, div) {
 }
 
 function tfbs_phylo_graph(herv_name, params, div) {
-  var args = create_args_for_tfbs(params);
   while (div.firstChild) {
     div.removeChild(div.firstChild);
   }
-  var TFBS_request = new XMLHttpRequest();
-  TFBS_request.open("GET", "graph_data/TFBS_phylogeny/"+herv_name+args, true)
-  TFBS_request.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      var data = JSON.parse(this.responseText);
-      var layout = { xaxis: { title: "" },
-                     yaxis: { title: "",
-                              ticks: "",
-                              showticklabels: false },
-                     autosize: false,
-                     width: 500,
-                     height: 590,
-                     margin: {l:10,r:80,t:15,b:168}};
-      Plotly.newPlot(div, data, layout);
-    }
-  }
-  TFBS_request.send();
+  var args = id_arg($("#herv_table").data("herv_list")
+                   .passed_tfbs(herv_name).id);
+  $.getJSON("graph_data/TFBS_phylogeny_by_id"+args, function (data) {
+    var layout = { xaxis: { title: "" },
+                   yaxis: { title: "",
+                            ticks: "",
+                            showticklabels: false },
+                   autosize: false,
+                   width: 500,
+                   height: 590,
+                   margin: {l:10,r:80,t:15,b:168}};
+    Plotly.newPlot(div, data, layout);
+  });
 }
 
 function motif_phylo_graph(herv_name, params, div) {
@@ -559,7 +564,7 @@ function set_select_options(herv_name) {
   dhs_anchor.setAttribute("href", "/download/dhs_position/"+herv_name);
   dhs_anchor.setAttribute("download", herv_name+"_dhs"+".tsv");
 }
-$("#merge_cell_types").on("change", function () {
+$("#merge_cell_types, #limit1").on("change", function () {
   var herv_name = location.hash.match(/^#!basic-info\/(.*)/m)[1];
   if (herv_name) {
     set_select_options(herv_name);
