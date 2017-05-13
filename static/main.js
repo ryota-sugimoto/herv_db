@@ -17,16 +17,17 @@ function Graphs(graphs) {
   $("#dhs_param").on("change", param_change);
 }
 
-Graphs.prototype.draw = function(herv_name) {
-  if (!herv_name) { herv_name = this.herv_name }
-  var params = get_params();
-  $("#introduction").css("display", "none");
-  $("#text_body").css("visivility", "visible");
-  $("#text_body").css("display", "block");
-  $(".herv_name").html(herv_name);
-  for (var i=0; i<this.graphs.length; i++) {
-    var div = document.getElementById(this.graphs[i].id);
-    if (div) this.graphs[i].draw(herv_name, params, div);
+Graphs.prototype.draw = function() {
+  if (this.herv_name) {
+    var params = get_params();
+    $("#introduction").css("display", "none");
+    $("#text_body").css("visivility", "visible");
+    $("#text_body").css("display", "block");
+    $(".herv_name").html(this.herv_name);
+    for (var i=0; i<this.graphs.length; i++) {
+      var div = document.getElementById(this.graphs[i].id);
+      if (div) this.graphs[i].draw(this.herv_name, params, div);
+    }
   }
 };
 
@@ -34,7 +35,7 @@ function get_params() {
   var res = [];
   var db_select = document.getElementById("db1");
   res["db1"] = db_select.options[db_select.selectedIndex].value;
-  res["hcre1"] = document.getElementById("hcre1").checked;
+  res["hcre1"] = true;
   
   res["z_score_mode"] = $("#z_score_mode")
                         .children("input[name=z_score_mode]:checked").val();
@@ -82,7 +83,7 @@ function Herv_list(data, div) {
   });
   $("#herv_table").data("herv_list", this);
   this.update_table();
-  $("#tfbs_hcre_param").on("change", function(e) {that.update_table();});
+  $("#tfbs_hcre_param").on("change", function(e) { that.update_table();});
   
   function child_table(tfs) {
     var table = document.createElement("TABLE");
@@ -90,7 +91,8 @@ function Herv_list(data, div) {
     var thead = document.createElement("THEAD");
     var header_row = document.createElement("TR");
     $(header_row)
-      .html("<td>TF</td><td>Count based z</td><td>Depth based z</td>");
+      .html("<td>TF</td><td>Count based z</td><td>Depth based z</td>"
+           +"<td>Depth ratio</td>");
     $(table).append($(thead).append(header_row));
     var mode = $("#z_score_mode")
                .children("input[name=z_score_mode]:checked").val();
@@ -107,7 +109,8 @@ function Herv_list(data, div) {
         }
         $(tr).html("<td>"+tf.name+"</td>"
                +"<td>"+tf.count_based_z_score+"</td>"
-               +"<td>"+tf.depth_based_z_score+"</td>");
+               +"<td>"+tf.depth_based_z_score+"</td>"
+               +"<td>"+tf.depth_ratio+"</td>");
         $(table).append(tr);
       }
     }
@@ -138,7 +141,7 @@ Herv_list.prototype.update_table = function () {
   var use_recalled = $("#recalled").prop("checked");
   var use_unique = $("#unique_reads").prop("checked");
   var z_min = Number($("#z_score1").val());
-  var hcre = $("#hcre1").prop("checked");
+  var depth_ratio_threshold = Number($("#depth_ratio_threshold").val());
   var mode = $("#z_score_mode")
             .children("input[name=z_score_mode]:checked").val();
   var db = $("#db1").val();
@@ -151,7 +154,7 @@ Herv_list.prototype.update_table = function () {
       var tf_recalled = (tf.recalled == "True");
       var tf_unique = tf.alignment == "unique"
       var cond1 = Number(tf[mode]) >= z_min;
-      var cond2 = tf.hcre || !hcre;
+      var cond2 = tf.depth_ratio >= depth_ratio_threshold;
       var cond3 = (db == "Roadmap|ENCODE") || (tf_db == db);
       var cond4 = tf_recalled == use_recalled;
       var cond5 = !use_recalled || tf_unique == use_unique;
@@ -599,6 +602,29 @@ $("document").ready(function () {
                   allow_single_deselect: true,
                   width: "150px"});
     });
+    
+    var hcre_threshold_input = $("#depth_ratio_threshold");
+    var threshold_slider = $("<div id='threshold_slider'></div>")
+                         .insertAfter(hcre_threshold_input)
+                         .slider({
+      min: 0,
+      max: 100,
+      range: "max",
+      value: Number(hcre_threshold_input.attr("value"))*100,
+      slide: function(event, ui) {
+        hcre_threshold_input.val((Number(ui.value)*0.01).toFixed(2));
+      },
+      stop: function(event, ui) {
+        $("#herv_table").data("herv_list").update_table();
+        graphs.draw();
+      }
+    });
+    threshold_slider.css("width", "80%");
+    threshold_slider.css("margin-bottom", "10px");
+    hcre_threshold_input.on("change", function() {
+      threshold_slider.slider("value", Number($(this).val())*100);
+    });
+
     if  (location.hash.substring(0,2) == "#!") {
       $(window).trigger("hashchange");
     }

@@ -30,21 +30,24 @@
           <option value="Roadmap">Roadmap</option>
           <option value="ENCODE">ENCODE</option>
         </select></br>
-        Transcription factor: <select id="tf_select"></select></br>
-        <input id="hcre1" type="checkbox" name="hcre" value="hcre" checked>Only TFs corresponding to HCREs</input></br>
+        <label for="tf_select">Transcription factor:</label>
+        <select id="tf_select"></select></br>
+        
+        <label for="depth_ratio_threshold">Depth ratio &gt;=</label>
+        <input id="depth_ratio_threshold" value="0.7" min="0" max="1" step="0.1" size="4"></input>
         
         <form id="z_score_mode">
           Statistical Thresholds: <span class="help" title="Note that a depth-based z score tends to be higher than a count-based z score, particularly in HERV/LR type whose length is long (such as internal sequence of HERV/LRs). See FAQs in Help page or our paper." >?</span></br>
           <input type="radio" name="z_score_mode" value="count_based_z_score">Count-based permutation test</input></br>
           <input type="radio" name="z_score_mode" value="depth_based_z_score" checked>Depth-based permutation test</input></br>
         </form>
-        z score &gt;= <input id="z_score1" type="number" value="3" min="-1000" max="1000" step="0.1"></br>
-        The upper limit of TFs shown in the graphs: <input id="limit1" type="number" value="10" min="1" max="100" step="1"></input></br>
+        z score &gt;= <input id="z_score1" type="number" value="3" min="-1000" max="1000" step="0.1" size="4"></br>
+        The upper limit of TFs shown in the graphs: <input id="limit1" type="number" value="10" min="1" max="100" step="1" size="4"></input></br>
       </div>
       <div id="dhs_param">
         <h4>Parameters for filtering HREV-DHSs</h4>
         <input id="represent" type="checkbox" name="represent" value="represent" checked>Only tier 1 and 2 cells</input> <span class="help" title="If you choose this option, the graph only shows HERV-DHSs in GM12878, H1-ES, K562, HepG2, HeLa S3, HUVEC, A549, and MCF7 cells, all of which are cllasified into ENCODE tier 1, 2, and a part of 2.5 cells." >?</span></br>
-        z score &gt;= <input id="z_score2" type="number" value="3" min="-1000" max="1000" step="0.1"></br>
+        z score &gt;= <input id="z_score2" type="number" value="3" min="-1000" max="1000" step="0.1" size="4"></br>
       </div>
       <div id="download_param">
         <h4>Parameters for download</h4>
