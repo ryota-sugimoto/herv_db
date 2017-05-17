@@ -30,17 +30,17 @@ def get_params(request):
   try:
     d["z_score"] = str(float(z_score))
   except ValueError:
-    d["z_score"] =" 3"
+    d["z_score"] = "3"
   
   db = request.args.get("db", ["Roadmap|ENCODE"])[0]
   if db == "Roadmap|ENCODE" or db == "Roadmap" or db == "ENCODE":
-    d["db"] = db
+    d["db"] = str(db)
   else:
     d["db"] = "Roadmap|ENCODE"
   
   limit = request.args.get("limit", ["10"])[0]
   if limit.isdigit() and int(limit) >= 0:
-    d["limit"] = limit
+    d["limit"] = str(limit)
   else:
     d["limit"] = "10"
   
@@ -69,8 +69,7 @@ def get_params(request):
   else:
     d["merge_cell_types"] = True
   
-  d["tf"] = request.args.get("tf", ["all"])[0]
-  
+  d["tf"] = str(request.args.get("tf", ["all"])[0])
   
   return d
 
@@ -225,10 +224,10 @@ def dhs_depth(request, herv_name):
                                        "application/json")
   params = get_params(request)
   if params["representative"]:
-    query = 'SELECT DHS_data, Depth FROM DHS_depth WHERE HERV="%(herv_name)s" AND DHS_Data IN ("UwdukeGm12878UniPk","UwdukeH1hescUniPk","UwdukeK562UniPk","UwdukeHepg2UniPk","UwdukeHelas3UniPk","UwdukeHuvecUniPk","UwdukeA549UniPk","UwdukeMcf7UniPk") AND Z_score >= %(z_score)s ORDER BY Z_score DESC LIMIT %(limit)s;'
+    query = 'SELECT DHS_data, Depth FROM DHS_depth WHERE HERV="%(herv_name)s" AND DHS_Data IN ("GM12878_Uwduke","H1-hESC_Uwduke","HeLa-S3_Uwduke","HUVEC_Uwduke","HepG2_Uwduke","K562_Uwduke","A549_Uwduke","MCF-7_Uwduke") AND Z_score >= %(z_score)s ORDER BY Z_score DESC LIMIT %(limit)s;'
   else:
     query = 'SELECT DHS_data, Depth FROM DHS_depth WHERE HERV="%(herv_name)s" AND Z_score >= %(z_score)s ORDER BY Z_score DESC LIMIT %(limit)s;'
-  params["herv_name"] = herv_name
+  params["herv_name"] = str(herv_name)
   query %= params
   d = dbpool.runQuery(query)
   def dhs_convert_json(l):
@@ -311,7 +310,7 @@ def TFBS_phylogeny_graph(request, herv_name):
                                        "application/json")
   query = 'SELECT T.TF, TB.TF_binding FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN TFBS_with_phylogeny AS TB WHERE HT.HERV="%(herv_name)s" AND HT.HCREs REGEXP "%(hcre)s" AND T.Project REGEXP "%(db)s" AND HT.%(z_score_mode)s_based_z_score >= %(z_score)s ORDER BY HT.%(z_score_mode)s_based_z_score DESC LIMIT %(limit)s ;'
   params = get_params(request)
-  params["herv_name"] = herv_name
+  params["herv_name"] = str(herv_name)
   query %= params
   d = dbpool.runQuery(query)
   d.addCallback(TFBS_map_json)
@@ -352,7 +351,7 @@ def motif_phylogeny_graph(request, herv_name):
                                        "application/json")
   query = 'SELECT T.TF, M.Motif_Id, Phy.P_value FROM((( Motif_with_phylogeny AS Phy NATURAL JOIN Motif_Id AS M) NATURAL JOIN HCREs_Id AS HC) NATURAL JOIN HERV_TFBS_Id AS HT) NATURAL JOIN TFBS_Id AS T WHERE HT.HERV="%(herv_name)s" AND T.Project REGEXP "%(db)s" AND HT.%(z_score_mode)s_based_z_score >= %(z_score)s ORDER BY HT.%(z_score_mode)s_based_z_score DESC ;'
   params = get_params(request)
-  params["herv_name"] = herv_name
+  params["herv_name"] = str(herv_name)
   query %= params
   d = dbpool.runQuery(query)
   d.addCallback(motif_map_json)
@@ -363,7 +362,7 @@ def tree_image(request, herv_name):
   request.responseHeaders.addRawHeader("Content-Type",
                                        "image/png")
   query = 'SELECT * FROM Tree_image WHERE HERV="%s";'
-  query %= herv_name
+  query %= str(herv_name)
   d = dbpool.runQuery(query)
   d.addCallback(lambda l: str(l[0][1]) if l else "")
   return d
