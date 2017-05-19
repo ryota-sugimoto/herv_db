@@ -75,7 +75,7 @@ function Herv_list(data, div) {
                 defaultContent: "&rarr;"},
               { title: "HERV",
                 data: "herv_anchor"},
-              { title: "Integration date",
+              { title: "Distribution of Orthologs",
                 data: "integration_date"},
               { title: "# TFBS",
                 className: "dt-body-right",
@@ -338,10 +338,19 @@ function tree_graph(herv_name, params, div) {
     div.removeChild(div.firstChild);
   }
   var tree_img = document.createElement("img");
-  div.appendChild(tree_img);
+  var no_image = document.createElement("P");
+  no_image.innerHTML = "The phylogenetic tree is not available for this" 
+  + " HERV/LTRs because this HERV/LTRs did not fulfill our criteria for"
+  + " the tree reconstruction (see our paper).";
+  $(no_image).css("color", "red");
+  $(tree_img).on("error", function () {
+    $(tree_img).hide();
+    div.appendChild(no_image);
+  })
   tree_img.setAttribute("src", "/image/tree/"+herv_name);
-  tree_img.setAttribute("alt", "NA");
+  div.appendChild(tree_img);
 }
+
 
 function ortholog_graph(herv_name, params, div) {
   var args = create_args_for_tfbs(params);

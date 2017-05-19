@@ -3,6 +3,7 @@
 
 from twisted.web.static import File
 from twisted.enterprise import adbapi
+from twisted.web.resource import NoResource
 from klein import Klein
 import json
 import zlib
@@ -364,7 +365,7 @@ def tree_image(request, herv_name):
   query = 'SELECT * FROM Tree_image WHERE HERV="%s";'
   query %= str(herv_name)
   d = dbpool.runQuery(query)
-  d.addCallback(lambda l: str(l[0][1]) if l else "")
+  d.addCallback(lambda l: str(l[0][1]) if l else NoResource())
   return d
 
 def dl_hcre_format(l):
