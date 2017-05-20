@@ -358,6 +358,17 @@ def motif_phylogeny_graph(request, herv_name):
   d.addCallback(motif_map_json)
   return d
 
+@app.route("/graph_data/motif_phylogeny_by_id")
+def motif_phylogeny_graph_by_id(request):
+  request.responseHeaders.addRawHeader("Content-Type",
+                                       "application/json")
+  query = "SELECT T.TF, M.Motif_Id, Phy.P_value FROM Motif_with_phylogeny AS Phy NATURAL JOIN Motif_Id AS M NATURAL JOIN HCREs_Id AS HC NATURAL JOIN HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T where HT.HERV_TFBS_Id in (%s)"
+  ids = request.args.get("id", [""])
+  query %= ",".join('"%s"' % s for s in ids)
+  d = dbpool.runQuery(query)
+  d.addCallback(motif_map_json)
+  return d
+
 @app.route("/image/tree/<herv_name>")
 def tree_image(request, herv_name):
   request.responseHeaders.addRawHeader("Content-Type",

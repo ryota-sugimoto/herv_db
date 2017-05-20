@@ -74,7 +74,8 @@ function Herv_list(data, div) {
                 orderable: false,
                 defaultContent: "&rarr;"},
               { title: "HERV",
-                data: "herv_anchor"},
+                data: "herv_anchor",
+                type: "natural"},
               { title: "Distribution of Orthologs",
                 data: "integration_date"},
               { title: "# TFBS",
@@ -396,27 +397,22 @@ function tfbs_phylo_graph(herv_name, params, div) {
 }
 
 function motif_phylo_graph(herv_name, params, div) {
-  var args = create_args_for_tfbs(params);
   while (div.firstChild) {
     div.removeChild(div.firstChild);
   }
-  var motif_request = new XMLHttpRequest();
-  motif_request.open("GET", "graph_data/motif_phylogeny/"+herv_name+args, true);
-  motif_request.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      var data = JSON.parse(this.responseText);
-      var layout = { xaxis: { title: "" },
-                     yaxis: { title: "",
-                              ticks: "",
-                              showticklabels: false },
-                     autosize: false,
-                     width: 750,
-                     height: 590,
-                     margin: {l:10,r:80,t:15,b:168}};
-      Plotly.newPlot(div, data, layout);
-    }
-  }
-  motif_request.send();
+  var args = id_arg($("#herv_table").data("herv_list")
+                   .passed_tfbs(herv_name).id);
+  $.getJSON("graph_data/motif_phylogeny_by_id"+args, function (data) {
+    var layout = { xaxis: { title: "" },
+                   yaxis: { title: "",
+                            ticks: "",
+                            showticklabels: false },
+                   autosize: false,
+                   width: 750,
+                   height: 590,
+                   margin: {l:10,r:80,t:15,b:168}};
+    Plotly.newPlot(div, data, layout);
+  });
 }
 
 function set_select_options(herv_name) {
