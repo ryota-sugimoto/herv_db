@@ -21,9 +21,9 @@
     <div id="left">
       <div id="parameters">
       <div id="tfbs_hcre_param">
-        <h4>Parameters for filtering HERV-TFBSs and HCREs</h4>
-        <input id="recalled" type="checkbox" name="recalled" value="recalled" checked>Unified pipeline</input></br>
-        <input id="unique_reads" type="checkbox" name="unique_reads" value="unique_reads" checked>Use only uniquely mapped reads</input></br>
+        <h4>Parameters for filtering HERV-TFBSs and HSREs</h4>
+        <input id="recalled" type="checkbox" name="recalled" value="recalled" checked>Unified pipeline </input><span class="help" title="If a user selects this option, TFBSs that were uniformly re-determined by us are used. If not, pre-determined TFBSs provided by ENCODE and Roadmap are used. See FAQs in Help page." >?</span></br>
+        <input id="unique_reads" type="checkbox" name="unique_reads" value="unique_reads" checked>Use only uniquely mapped reads </input><span class="help" title="If a user selects this option, unique-read TFBSs are used. If not, all-read TFBSs are used. See FAQs in Help page." >?</span></br>
         Database:
         <select id="db1">
           <option value="Roadmap|ENCODE">Roadmap and ENCODE</option>
@@ -33,25 +33,25 @@
         <label for="tf_select">Transcription factor:</label>
         <select id="tf_select"></select></br>
         
-        <label for="depth_ratio_threshold">Depth ratio &gt;=</label>
-        <input id="depth_ratio_threshold" value="0.7" min="0" max="1" step="0.1" size="4"></input>
+        <label for="depth_ratio_threshold">Proportion of TFBSs harboring TF-binding motifs: <span class="help" title="Proportion of HERV-TFBSs sharing the same TF-binding motifs. The proportion in the peak region in metaplot of HERV-TFBS is indicated. For identification of HSREs, we set the value at 0.6. See FAQs in Help page." >?</span></br> &gt;=</label>
+        <input id="depth_ratio_threshold" value="0.6" min="0" max="1" step="0.1" size="4"></input>
         
         <form id="z_score_mode">
-          Statistical Thresholds: <span class="help" title="Note that a depth-based z score tends to be higher than a count-based z score, particularly in HERV/LR type whose length is long (such as internal sequence of HERV/LRs). See FAQs in Help page or our paper." >?</span></br>
+          Statistical Thresholds: <span class="help" title="Note that a depth-based z score tends to be higher than a count-based z score, particularly in HERV/LTR type whose length is long (such as internal sequence of HERV/LTRs). See FAQs in Help page or our paper." >?</span></br>
           <input type="radio" name="z_score_mode" value="count_based_z_score">Count-based permutation test</input></br>
           <input type="radio" name="z_score_mode" value="depth_based_z_score" checked>Depth-based permutation test</input></br>
         </form>
-        z score &gt;= <input id="z_score1" type="number" value="3" min="-1000" max="1000" step="0.1" size="4"></br>
+        z score &gt;= <input id="z_score1" type="number" value="4" min="-1000" max="1000" step="0.1" size="4"></br>
         The upper limit of TFs shown in the graphs: <input id="limit1" type="number" value="10" min="1" max="100" step="1" size="4"></input></br>
       </div>
       <div id="dhs_param">
         <h4>Parameters for filtering HREV-DHSs</h4>
-        <input id="represent" type="checkbox" name="represent" value="represent" checked>Only tier 1 and 2 cells</input> <span class="help" title="If you choose this option, the graph only shows HERV-DHSs in GM12878, H1-ES, K562, HepG2, HeLa S3, HUVEC, A549, and MCF7 cells, all of which are cllasified into ENCODE tier 1, 2, and a part of 2.5 cells." >?</span></br>
-        z score &gt;= <input id="z_score2" type="number" value="3" min="-1000" max="1000" step="0.1" size="4"></br>
+        <input id="represent" type="checkbox" name="represent" value="represent" checked>Only tier 1 and 2 cells</input> <span class="help" title="If you choose this option, the graph only shows HERV-DHSs in GM12878, H1-hESC, K562, HepG2, HeLa-S3, HUVEC, A549, and MCF7 cells, all of which are cllasified into ENCODE tier 1, 2, and a part of 2.5 cells." >?</span></br>
+        z score &gt;= <input id="z_score2" type="number" value="4" min="-1000" max="1000" step="0.1" size="4"></br>
       </div>
       <div id="download_param">
         <h4>Parameters for download</h4>
-        <input id="merge_cell_types" type="checkbox" checked>Merge cell types</input> <span class="help" title="If you chose this option, you can download the following information identified using TFBSs or DHSs that were merged among cell types; genomic positions of HERV-TFBSs, HCREs, HERV-DHSs, and Gene Ontology (GO) associated with a particular kind of HCREs. If you don&#39;t choose this option, you can download the above information separately in respective cell types." >?</span></br>
+        <input id="merge_cell_types" type="checkbox" checked>Merge cell types</input> <span class="help" title="If you chose this option, you can download the following information identified using TFBSs or DHSs that were merged among cell types; genomic positions of HERV-TFBSs, HSREs, HERV-DHSs, and Gene Ontology (GO) associated with a particular kind of HSREs. If you don&#39;t choose this option, you can download the above information separately in respective cell types." >?</span></br>
       </div>
       </div>
       <div id="herv_menu"></div>
@@ -59,38 +59,38 @@
     <div id="right">
       <div id="introduction">
         <h2>Introduction</h2>
-        <p>Human endogenous retroviruses and other LTR type retrotransposons (HERV/LRs) have regulatory elements possibly affecting on transcriptions of host genes. dbHERV-REs is a database for these regulatory elements of HERV/LRs. The dbHERV-REs provides following information; (i) HERV-TFBSs, overlaps between HERV/LRs and transcription factor (TF)-binding sites (TFBSs), which were determined by ChIP-Seq, (ii) HERV/LRs Conserved Regulatory Elements (HCREs), TF-binding motifs in HERV-TFBSs that are conserved within a substantial fraction of a HERV/LR type, (iii) HERV-DHSs, overlaps between HERV/LRs and DNase I hypersensitive sites (DHSs), and (iv) Gene Ontology (GO) terms in which insertions of a kind of HCREs were enriched. Additionally, to approach evolutionary dynamics of regulatory elements in HERV/LRs, phylogenetic tree of a HERV/LR type is compared with presence of TFBSs, TF-binding motifs, and orthologous copies in genome of mammalians. Further descriptions are written in our paper.</p>
+        <p>Human endogenous retroviruses (HERVs) and other long terminal repeat (LTR)-type retrotransposons (HERV/LTRs) have regulatory elements that possibly influence the transcription of host genes. We systematically identified these regulatory elements based on publicly available datasets of ChIP-Seq for transcription factors (TFs) and DNase-Seq. We identified TF binding sites (TFBSs) on HERV/LTRs (HERV-TFBSs) and DNase I hypersensitive sites (DHSs) on HERV/LTRs (HERV-DHSs). Subsequently, we identified &quot;HERV/LTR-shared regulatory element (HSRE)&quot;, defined as a TF-binding motif in HERV-TFBSs, shared within a substantial fraction of a HERV/LTR type. dbHERV-REs is a database of HERV/LTR regulatory elements. The database provides (i) general information on HERV/LTRs such as family classification, copy number, and insertion date judged by distribution of orthologous copies among mammalian genome; (ii) positions of HERV-TFBSs, HSREs, and HERV-DHSs in the consensus sequence of HERV/LTRs and in human reference genome; and (iii) results of Gene ontology (GO) enrichment analyses with <a href=" http://bejerano.stanford.edu/great/public/html/ " target="_blank">GREAT</a> using sets of respective HSREs. The database also can compare phylogenetic relationship of HERV/LTR copies with the presence of orthologous copies across the mammalian genome, TFBSs, and TF-binding motifs. Further descriptions are written in our paper.</p>
         <p class="red">The contents of this web page are still undergoing review. All rights reserved. No part of this page may be cited or copied for any purpose.</p>
         <p class="red">This web page is comfirmed to work properly on Safari, Chrome and Firefox.</p> 
       </div>
       <div id="text_body">
         <h2>General Information</h2>
         <div id="general_info">
-        HERV/LR type: <span class="herv_name"></span></br>
-        HERV/LR family: <span id="herv_family"></span></br>
+        HERV/LTR type: <span class="herv_name"></span></br>
+        HERV/LTR family: <span id="herv_family"></span></br>
         Number of copies (fragments): <span id="copy_number"></span></br>
         More than 10% of the copies are shared within: <span id="integration_date"></span>
         </div>
-        <p><a id="dl_hcre" class="download_anchor">Download</a> information of HCREs of <span class="herv_name"></span>.</p>
+        <p><a id="dl_hcre" class="download_anchor">Download</a> information of HSREs of <span class="herv_name"></span>.</p>
 
         <h2>Metaplot of HERV-TFBSs</h2>
-        <p>Number of HERV-TFBSs mapped on each consensus position of the HERV/LR type. The x-axis indicates nucleotide positions of the consensus sequence of the HERV/LR type. The y-axis indicates number of HERV/LR copies harboring HERV-TFBSs at each position.</p>
+        <p>Number of HERV-TFBSs mapped on each consensus position of the HERV/LTR type. The x-axis indicates nucleotide positions of the consensus sequence of the HERV/LTR type. The y-axis indicates number of HERV/LTR copies harboring HERV-TFBSs at each position.</p>
         <div id="tfbs_depth_graph"></div>
         <p><a id="dl_herv_tfbs_position">Download</a> the genomic positions of HERV-TFBSs for <select id="tf_select_1" anchor_id="dl_herv_tfbs_position"><option value="all">all transcription factors</option></select> in human reference genome (GRCh37/hg19).</p>
 
         <h2>Metaplot of TF-binding motifs in TFBSs</h2>
-        <p>Number of TF-binding motifs in HERV-TFBSs mapped on each consensus position of the HERV/LR type. The x-axis indicates consensus position of the HERV/LR type. The y-axis indicates number of HERV/LR copies harboring the TF-binding motifs in TFBSs at each position. Peaks of the motifs corresponding to HCREs are shown with dots and motif names.</p>
+        <p>Number of TF-binding motifs in HERV-TFBSs mapped on each consensus position of the HERV/LTR type. The x-axis indicates consensus position of the HERV/LTR type. The y-axis indicates number of HERV/LTR copies harboring the TF-binding motifs in TFBSs at each position. Peaks of the motifs corresponding to HSREs are shown with dots and motif names.</p>
         <div id="motif_depth_graph"></div>
-        <p><a id="dl_hcre_position">Download</a> genomic positions of HCREs for <select id="tf_select_2" anchor_id="dl_hcre_position"><option value="all">all transcription factors</option></select > in human reference genome (GRCh37/hg19).</p>
-        <p><a id="dl_ontology">Download</a> Gene Ontology terms in which insertions of HCREs for <select id="tf_select_3" anchor_id="dl_ontology"><option value="all">all transcription factors</option></select >  were enriched.</p>
+        <p><a id="dl_hcre_position">Download</a> genomic positions of HSREs for <select id="tf_select_2" anchor_id="dl_hcre_position"><option value="all">all transcription factors</option></select > in human reference genome (GRCh37/hg19).</p>
+        <p><a id="dl_ontology">Download</a> Gene Ontology terms in which insertions of HSREs for <select id="tf_select_3" anchor_id="dl_ontology"><option value="all">all transcription factors</option></select >  were enriched.</p>
         
         <h2>Metaplot of HERV-DHSs</h2>
-        <p>Number of HERV-DHSs mapped on each consensus position of HERV/LR. The x-axis indicates consensus position of the HERV/LR type. The y-axis indicates number of HERV/LR copies harboring HERV-DHSs at each position.</p>
+        <p>Number of HERV-DHSs mapped on each consensus position of HERV/LTR. The x-axis indicates consensus position of the HERV/LTR type. The y-axis indicates number of HERV/LTR copies harboring HERV-DHSs at each position.</p>
         <div id="dhs_depth_graph"></div>
         <p><a id="dl_dhs_position">Download</a> genomic positions of HERV-DHSs for <span class="herv_name"> in human reference genome (GRCh37/hg19).</p>
 
-        <h2>Overlaps of HERV/LRs with each chromatin state</h2>
-        <p>Proportion of HERV/LR copies overlapped to each chromatin state predicted by chromatin segmentation. TSS; promoter region including TSS, PF; predicted promoter flanking region, E; enhancer, WE; weak enhancer or open chromatin cis regulatory element, CTCF; CTCF enriched element, T; transcribed region, R; repressed or low activity region.</p>
+        <h2>Overlaps of HERV/LTRs with each chromatin state</h2>
+        <p>Proportion of HERV/LTR copies overlapped to each chromatin state predicted by chromatin segmentation. TSS; promoter region including TSS, PF; predicted promoter flanking region, E; enhancer, WE; weak enhancer or open chromatin cis regulatory element, CTCF; CTCF enriched element, T; transcribed region, R; repressed or low activity region.</p>
         <div id="chromatin_state_graph"></div>
         
         <h2>Comparing phylogenetic subgroups and regulatory elements</h2>
@@ -98,19 +98,19 @@
           <div id="legend">
             <div class="phylo_legend">
               <h3>Phylogenetic tree</h3>
-              <p>An unrooted phylogenetic tree of HERV/LR copies. Representative supporting values calculated by Shimodaira-Hasegawa (SH)-like test are shown at the corresponding branches.</p>
+              <p>An unrooted phylogenetic tree of HERV/LTR copies. Representative supporting values calculated by Shimodaira-Hasegawa (SH)-like test are shown at the corresponding branches.</p>
             </div>
             <div class="phylo_legend">
               <h3>Orthologous copies</h3>
-              <p>Presences of orthologous copies of the HERV/LRs in reference genome of other  mammals.</p>
+              <p>Presences of orthologous HERV/LTR copies in the reference genomes of   mammals. The order of HERV/LTR copies is the same to the left tree.</p>
             </div>
             <div class="phylo_legend">
               <h3>TFBSs</h3>
-              <p>Presences of TFBSs on each HERV/LR copies.</p>
+              <p>Presences of TFBSs on each HERV/LTR copy. The order of HERV/LTR copies is the same to the left tree.</p>
             </div>
             <div class="phylo_legend">
               <h3>TF-binding motifs</h2>
-              <p>Presences of TF-binding motifs at positions corresponding to HCREs on each HERV/LR copy. Black and gray colors indicate presences of motifs with p values &lt; 0.0001 and &gt; 0.001, respectively.</p>
+              <p>Presences of TF-binding motifs at positions corresponding to HSREs on each HERV/LTR copy. The order of HERV/LTR copies is the same to the left tree. Black and gray colors indicate presences of motifs with p values &lt; 0.0001 and &gt; 0.001, respectively.</p>
             </div>
           </div>
           <div class="phylo_graph" id="tree"></div>
@@ -127,41 +127,43 @@
   <div id="help">
     <h2>Frequently Asked Questions (FAQs)</h2>
     <h3>What kinds of data are available?</h3>
-      <li>Transcription factor (TF)-binding sites (TFBSs) presented by the ENCODE and Roadmap Epigenomics. The 577 ChIP-Seq analyses were perfumed against 100 sequence-specific and pol II-associated TFs in total 100 cell lines.</li>
-      <li>DNase I hypersensitive sites (DHSs) presented by ENCODE. The DNase-Seq analyses were performed in 125 cell lines.</li>
-      <li>HERV/LR conserved regulatory elements (HCREs) identified by our original pipeline (see later).</li>
-      <li>General information of HERV/LR types; classification of the HERV/LR family, number of copies (fragments), and animal category that share orthologous copies of the HERV/LRs.</li>
-      <li>Comparison between phylogenetic relationship among the HERV/LR copies and presence of orthologous copies, TFBSs, and TF-binding motifs.</li>
-    <h3>What are HCREs (HERV/LR conserved regulatory elements)?</h3>
-    <p>When a regulatory element is observed on a sequence of HERV/LR, there are two possible evolutionary scenarios (Fig. 1A,1B) to depict how the regulatory element was generated.</p>
+      <li>TFBSs on HERV/LTRs (HERV-TFBSs). Positions of HERV-TFBSs in the consensus sequence of the HERV/LTRs and in the human reference genome are available. TFBSs were determined by ChIP-Seq datasets provided by ENCODE and Roadmap Epigenomics projects. To determine of the TFBSs, 519 ChIP-Seq datasets for 97 sequence-specific and pol II-associated TFs were analyzed using the unified analytical pipeline. Two types of TFBS datasets were generated; all-read and unique-read TFBSs. Please see &quot;What are all-read and unique-read TFBSs?&quot;.</li>
+      <li>DHSs on HERV/LTRs (HERV-DHSs). Positions of HERV-DHSs in the consensus sequence of the HERV/LTRs and in the human reference genome are available. DHSs for 124 cell types were provided by ENCODE.</li>
+      <li>HERV/LTR-shared regulatory elements (HSREs) identified by our original pipeline. Please see &quot;What are HSREs?&quot;. Positions of HSREs in the consensus sequence of the HERV/LTRs and in the human reference genome are available.</li>
+      <li>General information of HERV/LTR types; family classification, copies number, and taxon that share orthologous copies of the HERV/LTRs.</li>
+      <li>Comparison between phylogenetic relationship among the HERV/LTR copies and presence of orthologous copies, TFBSs, and TF-binding motifs.</li>
+    <h3>What are all-read and unique-read TFBSs?</h3>
+    <p> When focusing on repetitive elements such as HERV/LTRs, it is important to check whether multiple mapped reads (reads can be mapped to multiple genomic regions) are excluded in data analysis of next generation sequencing. If multiple mapped reads are not excluded, false positive peaks may be detected at regions that have sequences similar to those authentically bounded by the TF. If they are excluded, it is unfeasible to identify ChIP-Seq peaks on recently integrated HERV/LTRs that show low sequence divergence among the copies. Therefore, we generated two types of ChIP-Seq peaks (TFBSs) datasets: all-read and unique-read TFBSs. All-read TFBSs are ChIP-Seq peaks that were determined with all reads mapped to the human reference genome; in our analytical pipeline, a multiple mapped read was randomly assigned to a particular genomic position chosen from candidate positions. The unique-read TFBSs are ChIP-Seq peaks that were determined with only the reads uniquely mapped to the reference genome; in other words, multiple mapped reads were excluded before the peak calling of ChIP-Seq.</p>
+    <h3>What are HSREs (HERV/LTR conserved regulatory elements)?</h3>
+    <p>When a regulatory element is observed on a sequence of HERV/LTR, there are two possible evolutionary scenarios (Fig. 1A,1B) to depict how the regulatory element was generated.</p>
     <img src="static/picture/fig1.png">
-    <p class="center">Figure1A. Scenario 1: The regulatory element originally existed in the HERV/LR before the insertion</p>
+    <p class="center">Figure1A. Scenario 1: The regulatory element originally existed in the HERV/LTR before the insertion</p>
     <img src="static/picture/fig2.png">
     <p class="center">Figure1B. Scenario 2: The regulatory element was newly arisen by mutations after the insertion</p>
-    <p>We probably can distinguish the two scenarios by examining many of the HERV/LRs interspersed in the genome. Namely, the former scenario is more likely if the regulatory elements are shared/conserved among HERV/LR copies. For this purpose, we defined HCREs, regulatory elements (TF-binding motifs in TFBSs) that are shared/conserved within a substantial fraction of HERV/LR copies. We identified HCREs as following procedures (Fig. 2).</p>
+    <p>We probably can distinguish the two scenarios by examining many of the HERV/LTRs interspersed in the genome. Namely, the former scenario is more likely if the regulatory elements are shared/conserved among HERV/LTR copies. For this purpose, we defined HSREs, regulatory elements (TF-binding motifs in TFBSs) that are shared/conserved within a substantial fraction of HERV/LTR copies. We identified HSREs as following procedures (Fig. 2).</p>
     <img src="static/picture/fig3.png">
-    <p class="center">Figure 2. Scheme for identification of HCREs</p>
+    <p class="center">Figure 2. Scheme for identification of HSREs</p>
     <ol>
       <li>HERV-TFBS overlaps (HERV-TFBSs) were identified in respective cell types. Then HERV-TFBSs in distinct cell types were merged (merged HERV-TFBSs).</li>
-      <li>Multiple sequence alignment (MSA) of HERV/LR copies was constructed. Position of the merged HERV-TFBS was mapped on sequences in the MSA.</li>
+      <li>Multiple sequence alignment (MSA) of HERV/LTR copies was constructed. Position of the merged HERV-TFBS was mapped on sequences in the MSA.</li>
       <li>TF-binding motif was scanned in HERV-TFBS and mapped on each sequence in the MSA.</li>
-      <li>HERV-TFBSs and TF-binding motifs were counted at each consensus position in the MSA. If the peak of TF-binding motifs was higher than 70% of the peak of HERV-TFBSs, we referred to TF-binding motifs comprising the peak as HCREs.</li>
+      <li>HERV-TFBSs and TF-binding motifs were counted at each consensus position in the MSA. If the peak of TF-binding motifs was higher than 60% of the peak of HERV-TFBSs, we regarded a set of TF-binding motifs as HSRE.</li>
     </ol>
-    <p>We investigated HCREs for two purposes; (i) to infer property of regulatory elements that were anciently present in HERV/LRs or their ancestors of exogenous retroviruses, and (ii) to identify a set of regulatory elements that coordinately work in the genome. HCREs are shared among many HERV/LR copies that are interspersed in the genome, and then a set of HCREs can modulate several genes in a coordinate manner (Fig. 3).</p>
+    <p>We investigated HSREs for two purposes; (i) to infer property of regulatory elements that were anciently present in HERV/LTRs or their ancestors of exogenous retroviruses, and (ii) to identify a set of regulatory elements that coordinately work in the genome. HSREs are shared among many HERV/LTR copies that are interspersed in the genome, and then a set of HSREs can modulate several genes in a coordinate manner (Fig. 3).</p>
     <img src="static/picture/fig4.png"> 
-    <p class="center">Figure 3. Coordinate gene regulations by a set of HCREs</p>
-    <p>For this reason, many researchers considered that HERV/LRs sharing regulatory elements contributed to evolution of gene regulatory networks of the host.</p>
+    <p class="center">Figure 3. Coordinate gene regulations by a set of HSREs</p>
+    <p>For this reason, many researchers considered that HERV/LTRs sharing regulatory elements contributed to evolution of gene regulatory networks of the host.</p>
     <h3>What kind of statistical threshold is used for filtering HERV-TFBSs or HERV-DHSs?</h3>
-    <p>Sequences of HERV/LRs occupy a substantial fraction (9%) of the human genome, and so it is natural that some of TFBSs/DHSs are observed on the HERV/LR sequences. Therefore, it is important to identify TFBSs that were frequently observed among HERV/LR copies at a statistically significant level. For this purpose, we performed two kinds of permutation tests for filtering HERV-TFBSs; count-based and depth-based permutation tests. In the both tests, TFBSs that were identified in several cell types were merged and then used.</p>
+    <p>It is important to check whether a TF binds to a type of HERV/LTRs significantly more than expected, because HERV/LTRs occupy a large fraction of the genome, and therefore, TF binding would be partially observed on the HERV/LTRs regardless of the absence of a special association between the HERV/LTRs and TFs. Therefore, we evaluated statistical enrichment of binding of a TF in respective types of TEs to random expectation. For this purpose, we performed two kinds of permutation tests for filtering HERV-TFBSs; count-based and depth-based permutation tests. In the both tests, the merged TFBSs were used.</p>
     <ol>
       <li><p>Count-based permutation test</p>
         <p>We generated 100 randomized datasets of TFBSs by permuting genomic position of the TFBSs. In the observed and randomized datasets, HERV-TFBS overlaps were counted. Standardized score (z score) was calculated based on counts in the observed and the randomized datasets. The count-based test is available for all HERV-TFBS combinations.</p>
       </li>
       <li><p>Depth-based permutation test</p>
-        <p>We generated 500 randomized datasets of TFBSs by permuting genomic position of the TFBSs. In the observed and randomized datasets, depth of TFBSs in the MSA (Fig. 1C top) was measured at each consensus position. Z score was calculated at each consensus position based on depths in the observed, and randomized datasets (referred to as base-wised z score). After smoothing the base-wised z score with sliding window algorithm (window size; 50 bp), the maximum base-wised z score among all positions was defined as a depth-based z score. In respective HERV/LR types, the depth-based test is only done for TFBSs whose maximum depth in observed dataset is greater than or equal to 10.</p>
+        <p>We generated 500 randomized datasets of TFBSs by permuting genomic position of the TFBSs. In the observed and randomized datasets, depth of TFBSs in the MSA (Fig. 1C top) was measured at each consensus position. Z score was calculated at each consensus position based on depths in the observed, and randomized datasets (referred to as base-wised z score). After smoothing the base-wised z score with sliding window algorithm (window size; 50 bp), the maximum base-wised z score among all positions was defined as a depth-based z score. In respective HERV/LTR types, the depth-based test is only done for TFBSs whose maximum depth in observed dataset is greater than or equal to 10.</p>
       </li>
     </ol>
-    <p>For filtering of HERV-DHSs, the count-based permutation test is available. Depth-based z score can distinguish the two situations shown in Fig. 4 whereas count-based z score cannot. Please note that a depth-based z score tends to be more sensitive than a count-based z score, particularly when a HERV/LR type has long consensus sequence (such as internal sequence of HERV/LRs).</p>
+    <p>For filtering of HERV-DHSs, the count-based permutation test is available. Depth-based z score can distinguish the two situations shown in Fig. 4 whereas count-based z score cannot. Please note that a depth-based z score tends to be more sensitive than a count-based z score, particularly when a HERV/LTR type has long consensus sequence (such as internal sequence of HERV/LTRs).</p>
     <img src="static/picture/fig5.png">
     <p class="center">Figure 4. Two possible situations when HERV-TFBS overlaps were observed at 5 times</p>
     <h3>How genomic positions were described in files downloaded from this website?</h3>
