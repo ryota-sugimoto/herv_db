@@ -133,27 +133,27 @@
       <li>General information of HERV/LTR types; family classification, copies number, and taxon that share orthologous copies of the HERV/LTRs.</li>
       <li>Comparison between phylogenetic relationship among the HERV/LTR copies and presence of orthologous copies, TFBSs, and TF-binding motifs.</li>
     <h3>What are all-read and unique-read TFBSs?</h3>
-    <p> When focusing on repetitive elements such as HERV/LTRs, it is important to check whether multiple mapped reads (reads can be mapped to multiple genomic regions) are excluded in data analysis of next generation sequencing. If multiple mapped reads are not excluded, false positive peaks may be detected at regions that have sequences similar to those authentically bounded by the TF. If they are excluded, it is unfeasible to identify ChIP-Seq peaks on recently integrated HERV/LTRs that show low sequence divergence among the copies. Therefore, we generated two types of ChIP-Seq peaks (TFBSs) datasets: all-read and unique-read TFBSs. All-read TFBSs are ChIP-Seq peaks that were determined with all reads mapped to the human reference genome; in our analytical pipeline, a multiple mapped read was randomly assigned to a particular genomic position chosen from candidate positions. The unique-read TFBSs are ChIP-Seq peaks that were determined with only the reads uniquely mapped to the reference genome; in other words, multiple mapped reads were excluded before the peak calling of ChIP-Seq.</p>
+    <p> When focusing on repetitive elements such as HERV/LTRs, it is important to check whether multiple mapped reads (reads can be mapped to multiple genomic regions) are excluded in data analysis of next generation sequencing. If multiple mapped reads are not excluded, false positive peaks may be detected at regions that have sequences similar to those authentically bounded by the TF. If they are excluded, it is unfeasible to identify ChIP-Seq peaks on recently integrated HERV/LTRs that show low sequence divergence among the copies. Therefore, we generated two types of ChIP-Seq peaks (TFBSs) datasets: all-read and unique-read TFBSs (Fig. 1). All-read TFBSs are ChIP-Seq peaks that were determined with all reads mapped to the human reference genome; in our analytical pipeline, a multiple mapped read was randomly assigned to a particular genomic position chosen from candidate positions. The unique-read TFBSs are ChIP-Seq peaks that were determined with only the reads uniquely mapped to the reference genome; in other words, multiple mapped reads were excluded before the peak calling of ChIP-Seq.</p>
     <img src="static/picture/fig1.png">
     <p class="center">Fig. 1. An analytical pipeline for peak calling of ChIP-Seq in this study</p>
-    <h3>What are HSREs (HERV/LTR conserved regulatory elements)?</h3>
-    <p>When a regulatory element is observed on a sequence of HERV/LTR, there are two possible evolutionary scenarios (Fig. 1A,1B) to depict how the regulatory element was generated.</p>
-    <img src="static/picture/fig2.png">
-    <p class="center">Figure1A. Scenario 1: The regulatory element originally existed in the HERV/LTR before the insertion</p>
+    <h3>What are HSREs (HERV/LTR shared regulatory elements)?</h3>
+    <p>When a regulatory element is observed on a sequence of HERV/LTR, there are two possible evolutionary scenarios (Fig. 2A, 2B) to depict how the regulatory element was generated.</p>
+    <img src="static/picture/fig2a.png">
+    <p class="center">Fig. 2A. Scenario 1: The regulatory element originally existed in the HERV/LTR before the insertion</p>
+    <img src="static/picture/fig2b.png">
+    <p class="center">Fig. 2B. Scenario 2: The regulatory element was newly arisen by mutations after the insertion</p>
+    <p>We probably can distinguish the two scenarios by examining many of the HERV/LTRs interspersed in the genome. Namely, the former scenario is more likely if the regulatory elements are shared/conserved among HERV/LTR copies. For this purpose, we defined HSREs, regulatory elements (TF-binding motifs in TFBSs) that are shared/conserved within a substantial fraction of HERV/LTR copies. We identified HSREs as following procedures (Fig. 3).</p>
     <img src="static/picture/fig3.png">
-    <p class="center">Figure1B. Scenario 2: The regulatory element was newly arisen by mutations after the insertion</p>
-    <p>We probably can distinguish the two scenarios by examining many of the HERV/LTRs interspersed in the genome. Namely, the former scenario is more likely if the regulatory elements are shared/conserved among HERV/LTR copies. For this purpose, we defined HSREs, regulatory elements (TF-binding motifs in TFBSs) that are shared/conserved within a substantial fraction of HERV/LTR copies. We identified HSREs as following procedures (Fig. 2).</p>
-    <img src="static/picture/fig4.png">
-    <p class="center">Figure 2. Scheme for identification of HSREs</p>
+    <p class="center">Fig. 3. Scheme for identification of HSREs</p>
     <ol>
       <li>HERV-TFBS overlaps (HERV-TFBSs) were identified in respective cell types. Then HERV-TFBSs in distinct cell types were merged (merged HERV-TFBSs).</li>
       <li>Multiple sequence alignment (MSA) of HERV/LTR copies was constructed. Position of the merged HERV-TFBS was mapped on sequences in the MSA.</li>
       <li>TF-binding motif was scanned in HERV-TFBS and mapped on each sequence in the MSA.</li>
       <li>HERV-TFBSs and TF-binding motifs were counted at each consensus position in the MSA. If the peak of TF-binding motifs was higher than 60% of the peak of HERV-TFBSs, we regarded a set of TF-binding motifs as HSRE.</li>
     </ol>
-    <p>We investigated HSREs for two purposes; (i) to infer property of regulatory elements that were anciently present in HERV/LTRs or their ancestors of exogenous retroviruses, and (ii) to identify a set of regulatory elements that coordinately work in the genome. HSREs are shared among many HERV/LTR copies that are interspersed in the genome, and then a set of HSREs can modulate several genes in a coordinate manner (Fig. 3).</p>
-    <img src="static/picture/fig5.png"> 
-    <p class="center">Figure 3. Coordinate gene regulations by a set of HSREs</p>
+    <p>We investigated HSREs for two purposes; (i) to infer property of regulatory elements that were anciently present in HERV/LTRs or their ancestors of exogenous retroviruses, and (ii) to identify a set of regulatory elements that coordinately work in the genome. HSREs are shared among many HERV/LTR copies that are interspersed in the genome, and then a set of HSREs can modulate several genes in a coordinate manner (Fig. 4).</p>
+    <img src="static/picture/fig4.png"> 
+    <p class="center">Fig. 4. Coordinate gene regulations by a set of HSREs</p>
     <p>For this reason, many researchers considered that HERV/LTRs sharing regulatory elements contributed to evolution of gene regulatory networks of the host.</p>
     <h3>What kind of statistical threshold is used for filtering HERV-TFBSs or HERV-DHSs?</h3>
     <p>It is important to check whether a TF binds to a type of HERV/LTRs significantly more than expected, because HERV/LTRs occupy a large fraction of the genome, and therefore, TF binding would be partially observed on the HERV/LTRs regardless of the absence of a special association between the HERV/LTRs and TFs. Therefore, we evaluated statistical enrichment of binding of a TF in respective types of TEs to random expectation. For this purpose, we performed two kinds of permutation tests for filtering HERV-TFBSs; count-based and depth-based permutation tests. In the both tests, the merged TFBSs were used.</p>
@@ -162,12 +162,12 @@
         <p>We generated 100 randomized datasets of TFBSs by permuting genomic position of the TFBSs. In the observed and randomized datasets, HERV-TFBS overlaps were counted. Standardized score (z score) was calculated based on counts in the observed and the randomized datasets. The count-based test is available for all HERV-TFBS combinations.</p>
       </li>
       <li><p>Depth-based permutation test</p>
-        <p>We generated 500 randomized datasets of TFBSs by permuting genomic position of the TFBSs. In the observed and randomized datasets, depth of TFBSs in the MSA (Fig. 1C top) was measured at each consensus position. Z score was calculated at each consensus position based on depths in the observed, and randomized datasets (referred to as base-wised z score). After smoothing the base-wised z score with sliding window algorithm (window size; 50 bp), the maximum base-wised z score among all positions was defined as a depth-based z score. In respective HERV/LTR types, the depth-based test is only done for TFBSs whose maximum depth in observed dataset is greater than or equal to 10.</p>
+        <p>We generated 500 randomized datasets of TFBSs by permuting genomic position of the TFBSs. In the observed and randomized datasets, depth of TFBSs in the MSA (Fig. 3-4) was measured at each consensus position. Z score was calculated at each consensus position based on depths in the observed, and randomized datasets (referred to as base-wised z score). After smoothing the base-wised z score with sliding window algorithm (window size; 50 bp), the maximum base-wised z score among all positions was defined as a depth-based z score. In respective HERV/LTR types, the depth-based test is only done for TFBSs whose maximum depth in observed dataset is greater than or equal to 10.</p>
       </li>
     </ol>
-    <p>For filtering of HERV-DHSs, the count-based permutation test is available. Depth-based z score can distinguish the two situations shown in Fig. 4 whereas count-based z score cannot. Please note that a depth-based z score tends to be more sensitive than a count-based z score, particularly when a HERV/LTR type has long consensus sequence (such as internal sequence of HERV/LTRs).</p>
-    <img src="static/picture/fig6.png">
-    <p class="center">Figure 4. Two possible situations when HERV-TFBS overlaps were observed at 5 times</p>
+    <p>For filtering of HERV-DHSs, the count-based permutation test is available. Depth-based z score can distinguish the two situations shown in Fig. 5 whereas count-based z score cannot. Please note that a depth-based z score tends to be more sensitive than a count-based z score, particularly when a HERV/LTR type has long consensus sequence (such as internal sequence of HERV/LTRs).</p>
+    <img src="static/picture/fig5.png">
+    <p class="center">Fig. 5. Two possible situations when HERV-TFBS overlaps were observed at 5 times</p>
     <h3>How genomic positions were described in files downloaded from this website?</h3>
     <p>These files were written by BED-like format. Namely, a row indicate a particular genomic feature (HERV-TFBSs) and itsF genomic position; chromosome name, cromStart position, and chromEnd position. The first base in a chromosome is numbered 0, and the chromEnd base is not included in the feature. For example, the first 100 bases of a chromosome are defined as chromStart=0, chromEnd=100, and span the bases numbered 0-99.</p>
     
