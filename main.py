@@ -62,7 +62,7 @@ def get_params(request):
     d["z_score_mode"] = "Depth"
   
 
-  merge_cell_types = request.args.get("merge_cell_types", ["true"])[0]
+  merge_cell_types = request.args.get("merge", ["true"])[0]
   if merge_cell_types == "true":
     d["merge_cell_types"] = True
   elif merge_cell_types == "false":
@@ -428,7 +428,7 @@ def dl_herv_tfbs_position_by_id(request):
   request.responseHeaders.addRawHeader("Content-Type", 
                                       "text/tab-separated-values")
 
-  merge = request.args.get("merge", "true") == "true"
+  merge = request.args.get("merge", ["true"])[0] == "true"
   ids = request.args.get("id", [""])
   
   if merge:
@@ -483,7 +483,7 @@ def dl_hcre_position_by_id(request):
   request.responseHeaders.addRawHeader("Content-Type", 
                                       "text/tab-separated-values")
 
-  merge = request.args.get("merge", "true") == "true"
+  merge = request.args.get("merge", ["true"])[0] == "true"
   ids = request.args.get("id", [""])
 
   if merge:
@@ -550,7 +550,7 @@ def dl_ontology_by_id(request, herv_name):
   request.responseHeaders.addRawHeader("Content-Type",
                                       "text/tab-separated-values")
   tfs = request.args.get("id", [""])
-  merge = request.args.get("merge", "true") == "true"
+  merge = request.args.get("merge", ["true"])[0] == "true"
   if merge:
     header = "#HERV/LR_type\tTF\tGO_Id\tDescription\tP_value\tFDR\tFER\tFold_enrichment\tHit_number\tHit_gene_number\tHit_genes"
     query = 'SELECT GO.HERV, T.TF, GO.GO_Id, GO.GO_description, GO.P_value, GO.FDR, GO.FER, GO.Fold_enrichment, GO.Hit_num, GO.Hit_gene_num, GO.HIT_genes FROM HCREs_GO_Merge AS GO NATURAL JOIN TFBS_Id AS T WHERE GO.HERV = "%s" and T.TF in (%s)'

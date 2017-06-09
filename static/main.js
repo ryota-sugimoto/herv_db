@@ -477,7 +477,7 @@ function set_select_options(herv_name) {
                           + herv_name
                           + all_tf_name_arg
                           + merge_arg);
-  a3.setAttribute("download", herv_name + "all_ontology" + merged + ".tsv");
+  a3.setAttribute("download", herv_name + "_all_ontology" + merged + ".tsv");
 
   $(tf_select_1).on("change", function () {
     if ($("#merge_cell_types").prop("checked")) {
