@@ -388,7 +388,7 @@ def dl_hcre_format(l):
 def dl_hcre(request, herv_name):
   request.responseHeaders.addRawHeader("Content-Type", 
                                        "text/tab-separated-values")
-  file_name = "%s_hcre.tsv" % (str(herv_name),)
+  file_name = "%s_hsre.tsv" % (str(herv_name),)
   request.responseHeaders.addRawHeader("Content-Disposition",
                                        'attachment; filename="%s"'%file_name)
   query = 'SELECT HC.HERV, T.TF, M.Motif_Id, M.Motif_name, M.Motif_origin, M.Start_in_consensus_seq, M.End_in_consensus_seq FROM(Motif_Id AS M NATURAL JOIN HCREs_Id AS HC) NATURAL JOIN TFBS_Id AS T WHERE HC.HERV = "%s";'
@@ -502,12 +502,12 @@ def dl_hcre_position_by_id(request):
   tf_name = request.args.get("tf_name", ["unknown"])[0]
 
   if merge:
-    file_name = "%s_%s_hcre_merged.tsv" % (herv_name, tf_name)
+    file_name = "%s_%s_hsre_merged.tsv" % (herv_name, tf_name)
     request.responseHeaders.addRawHeader("Content-Disposition",
                                          'attachment; filename="%s"'%file_name)
     query = 'SELECT P.Chrom, P.Start, P.End, HT.HERV, T.TF, P.Locus, P.Motif_Id, P.Motif_strand, P.Motif_pval, P.Match_sequence FROM((HCREs_Id AS HC NATURAL JOIN HERV_TFBS_Id AS HT) NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Position_HCREs AS P WHERE HT.HERV_TFBS_Id in (%s);'
   else:
-    file_name = "%s_%s_hcre.tsv" % (herv_name, tf_name)
+    file_name = "%s_%s_hsre.tsv" % (herv_name, tf_name)
     request.responseHeaders.addRawHeader("Content-Disposition",
                                          'attachment; filename="%s"'%file_name)
     query = 'SELECT P.Chrom, P.Start, P.End, HT.HERV, T.TF, P.Locus, P.Motif_Id, P.Motif_strand, P.Motif_pval, P.Match_sequence, D.Cell_name, D.Note, D.File_name FROM((((HCREs_Id AS HC NATURAL JOIN HERV_TFBS_Id AS HT) NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Position_HCREs AS P) NATURAL JOIN Mapping_HCREs_Dataset AS MP) NATURAL JOIN Dataset AS D WHERE HT.HERV_TFBS_Id in (%s);'
