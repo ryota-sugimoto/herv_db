@@ -438,9 +438,6 @@ function set_select_options(herv_name) {
     option_1.value = tf_id;
     option_2.value = tf_id;
     option_3.value = tf_name;
-    option_1.setAttribute("name", tf_name);
-    option_2.setAttribute("name", tf_name);
-    option_3.setAttribute("name", tf_name);
     option_1.innerHTML = tf_name;
     option_2.innerHTML = tf_name;
     option_3.innerHTML = tf_name;
@@ -452,23 +449,23 @@ function set_select_options(herv_name) {
   var all_tf_arg = id_arg($("#herv_table").data("herv_list")
                   .passed_tfbs(herv_name).id);
   if ($("#merge_cell_types").prop("checked")) {
-    var merge_arg = ";merge=" + "true";
-    var merged = "_merged";
+    var merge_arg = ";merge=true";
   } else {
-    var merge_arg = ";merge=" + "false";
-    var merged = "";
+    var merge_arg = ";merge=false";
   }
   
   var a1 = document.getElementById(tf_select_1.getAttribute("anchor_id"));
-  a1.setAttribute("href", "/download/herv_tfbs_position_by_id" 
+  a1.setAttribute("href", "/download/herv_tfbs_position_by_id"
                           + all_tf_arg
-                          + merge_arg);
-  a1.setAttribute("download", herv_name + "_all_tfbs" + merged + ".tsv");
+                          + merge_arg
+                          + ";herv_name="+herv_name
+                          + ";tf_name=all");
   var a2 = document.getElementById(tf_select_2.getAttribute("anchor_id"));
   a2.setAttribute("href", "/download/hcre_position_by_id"
                           + all_tf_arg
-                          + merge_arg);
-  a2.setAttribute("download", herv_name + "_all_hcre" + merged + ".tsv");
+                          + merge_arg
+                          + ";herv_name="+herv_name
+                          + ";tf_name=all");
   
   var all_tf_name_arg = id_arg($("#herv_table").data("herv_list")
                                .passed_tfbs(herv_name).name);
@@ -476,16 +473,15 @@ function set_select_options(herv_name) {
   a3.setAttribute("href", "/download/ontology_by_id/"
                           + herv_name
                           + all_tf_name_arg
-                          + merge_arg);
-  a3.setAttribute("download", herv_name + "_all_ontology" + merged + ".tsv");
+                          + merge_arg
+                          + ";herv_name="+herv_name
+                          + ";tf_name=all");
 
   $(tf_select_1).on("change", function () {
     if ($("#merge_cell_types").prop("checked")) {
-      var merge_arg = ";merge=" + "true";
-      var merged = "_merged";
+      var merge_arg = ";merge=true";
     } else {
-      var merge_arg = ";merge=" + "false";
-      var merged = "";
+      var merge_arg = ";merge=false";
     }
     var tf_id = this.value;
     if (tf_id == "all") {
@@ -494,26 +490,22 @@ function set_select_options(herv_name) {
       var tf_name = "all";
     } else {
       var tf_arg = "?id=" + tf_id;
-      var tf_name = this.name;
+      var tf_name = $(this).find('option:selected').text();
     }
     var anchor = document.getElementById(this.getAttribute("anchor_id"));
     anchor.setAttribute("href",
                         "/download/herv_tfbs_position_by_id"
                         + tf_arg
-                        + merge_arg);
-    anchor.setAttribute("download",
-                        herv_name 
-                        + "_" + tf_name 
-                        + "_tfbs" + merged + ".tsv");
+                        + merge_arg
+                        + ";herv_name="+herv_name
+                        + ";tf_name="+tf_name);
   });
 
   $(tf_select_2).on("change", function () {
     if ($("#merge_cell_types").prop("checked")) {
-      var merge_arg = ";merge=" + "true";
-      var merged = "_merged";
+      var merge_arg = ";merge=true";
     } else {
-      var merge_arg = ";merge=" + "false";
-      var merged = "";
+      var merge_arg = ";merge=false";
     }
     var tf_id = this.value;
     if (tf_id == "all") {
@@ -522,26 +514,22 @@ function set_select_options(herv_name) {
       var tf_name = "all";
     } else {
       var tf_arg = "?id=" + tf_id;
-      var tf_name = this.name;
+      var tf_name = $(this).find('option:selected').text();
     }
     var anchor = document.getElementById(this.getAttribute("anchor_id"));
     anchor.setAttribute("href",
                         "/download/hcre_position_by_id"
                         + tf_arg
-                        + merge_arg);
-    anchor.setAttribute("download",
-                        herv_name 
-                        + "_" + tf_name 
-                        + "_hcre" + merged + ".tsv");
+                        + merge_arg
+                        + ";herv_name="+herv_name
+                        + ";tf_name="+tf_name);
   });
   
   $(tf_select_3).on("change", function () {
     if ($("#merge_cell_types").prop("checked")) {
       var merge_arg = ";merge=" + "true";
-      var merged = "_merged";
     } else {
       var merge_arg = ";merge=" + "false";
-      var merged = "";
     }
     var tf_id = this.value;
     if (tf_id == "all") {
@@ -550,27 +538,23 @@ function set_select_options(herv_name) {
       var tf_name = "all";
     } else {
       var tf_arg = "?id=" + this.value;
-      var tf_name = this.value;
+      var tf_name = $(this).find('option:selected').text();
     }
     var anchor = document.getElementById(this.getAttribute("anchor_id"));
     anchor.setAttribute("href",
                         "/download/ontology_by_id/"
                         + herv_name
                         + tf_arg
-                        + merge_arg);
-    anchor.setAttribute("download",
-                        herv_name 
-                        + "_" + tf_name 
-                        + "_ontology" + merged + ".tsv");
+                        + merge_arg
+                        + ";herv_name="+herv_name
+                        + ";tf_name="+tf_name);
   });
 
   var hcre_anchor = document.getElementById("dl_hcre");
   hcre_anchor.setAttribute("href", "/download/hcre/"+herv_name);
-  hcre_anchor.setAttribute("download", herv_name+".tsv");
   
   var dhs_anchor = document.getElementById("dl_dhs_position");
   dhs_anchor.setAttribute("href", "/download/dhs_position/"+herv_name);
-  dhs_anchor.setAttribute("download", herv_name+"_dhs"+".tsv");
 }
 $("#merge_cell_types, #limit1").on("change", function () {
   var herv_name = location.hash.match(/^#!basic-info\/(.*)/m)[1];

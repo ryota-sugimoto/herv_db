@@ -388,6 +388,9 @@ def dl_hcre_format(l):
 def dl_hcre(request, herv_name):
   request.responseHeaders.addRawHeader("Content-Type", 
                                        "text/tab-separated-values")
+  file_name = "%s_hcre.tsv" % (str(herv_name),)
+  request.responseHeaders.addRawHeader("Content-Disposition",
+                                       'attachment; filename="%s"'%file_name)
   query = 'SELECT HC.HERV, T.TF, M.Motif_Id, M.Motif_name, M.Motif_origin, M.Start_in_consensus_seq, M.End_in_consensus_seq FROM(Motif_Id AS M NATURAL JOIN HCREs_Id AS HC) NATURAL JOIN TFBS_Id AS T WHERE HC.HERV = "%s";'
   query %= (str(herv_name), )
   d = dbpool.runQuery(query)
@@ -426,14 +429,24 @@ def dl_herv_tfbs_position(request, herv_name):
 @app.route("/download/herv_tfbs_position_by_id")
 def dl_herv_tfbs_position_by_id(request):
   request.responseHeaders.addRawHeader("Content-Type", 
-                                      "text/tab-separated-values")
+                                       "text/tab-separated-values")
+  
 
   merge = request.args.get("merge", ["true"])[0] == "true"
   ids = request.args.get("id", [""])
+  herv_name = request.args.get("herv_name", ["unknown"])[0]
+  tf_name = request.args.get("tf_name", ["unknown"])[0]
+  
   
   if merge:
+    file_name = "%s_%s_tfbs_merged.tsv" % (herv_name, tf_name)
+    request.responseHeaders.addRawHeader("Content-Disposition",
+                                         'attachment; filename="%s"'%file_name)
     query = 'SELECT P.Chrom, P.Start, P.End, HT.HERV, T.TF, P.Locus FROM(HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Position_HERV_TFBS_Merged AS P WHERE HT.HERV_TFBS_Id in (%s);'
   else:
+    file_name = "%s_%s_tfbs.tsv" % (herv_name, tf_name)
+    request.responseHeaders.addRawHeader("Content-Disposition",
+                                         'attachment; filename="%s"'%file_name)
     query = 'SELECT P.Chrom, P.Start, P.End, HT.HERV, T.TF, P.Locus, D.Cell_name, D.Note, D.File_name FROM((HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Position_HERV_TFBS_in_each_cell AS P) NATURAL JOIN Dataset AS D WHERE HT.HERV_TFBS_ID in (%s);'
 
   query %= ",".join('"%s"' % s for s in ids)
@@ -485,10 +498,18 @@ def dl_hcre_position_by_id(request):
 
   merge = request.args.get("merge", ["true"])[0] == "true"
   ids = request.args.get("id", [""])
+  herv_name = request.args.get("herv_name", ["unknown"])[0]
+  tf_name = request.args.get("tf_name", ["unknown"])[0]
 
   if merge:
+    file_name = "%s_%s_hcre_merged.tsv" % (herv_name, tf_name)
+    request.responseHeaders.addRawHeader("Content-Disposition",
+                                         'attachment; filename="%s"'%file_name)
     query = 'SELECT P.Chrom, P.Start, P.End, HT.HERV, T.TF, P.Locus, P.Motif_Id, P.Motif_strand, P.Motif_pval, P.Match_sequence FROM((HCREs_Id AS HC NATURAL JOIN HERV_TFBS_Id AS HT) NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Position_HCREs AS P WHERE HT.HERV_TFBS_Id in (%s);'
   else:
+    file_name = "%s_%s_hcre.tsv" % (herv_name, tf_name)
+    request.responseHeaders.addRawHeader("Content-Disposition",
+                                         'attachment; filename="%s"'%file_name)
     query = 'SELECT P.Chrom, P.Start, P.End, HT.HERV, T.TF, P.Locus, P.Motif_Id, P.Motif_strand, P.Motif_pval, P.Match_sequence, D.Cell_name, D.Note, D.File_name FROM((((HCREs_Id AS HC NATURAL JOIN HERV_TFBS_Id AS HT) NATURAL JOIN TFBS_Id AS T) NATURAL JOIN Position_HCREs AS P) NATURAL JOIN Mapping_HCREs_Dataset AS MP) NATURAL JOIN Dataset AS D WHERE HT.HERV_TFBS_Id in (%s);'
 
   query %= ",".join('"%s"' % s for s in ids)
@@ -501,7 +522,7 @@ def dl_hcre_position_by_id(request):
     for t in l:
       res.append("\t".join(str(i) for i in t))
     return "\n".join(res)
-  d.addCallback(dl_hcre_format)
+  d.addCallback(dl_hcre_position_format)
   return d
 
 
@@ -509,6 +530,9 @@ def dl_hcre_position_by_id(request):
 def dl_dhs_position(request, herv_name):
   request.responseHeaders.addRawHeader("Content-Type", 
                                        "text/tab-separated-values")
+  file_name = "%s_dhs.tsv" % (str(herv_name),)
+  request.responseHeaders.addRawHeader("Content-Disposition",
+                                       'attachment; filename="%s"'%file_name)
   query = 'SELECT P.Chrom, P.Start, P.End, P.HERV, P.Cell_name, P.Locus FROM Position_HERV_DHS AS P WHERE P.HERV = "%s";'
   query %= (str(herv_name),)
   d = dbpool.runQuery(query)
@@ -551,18 +575,25 @@ def dl_ontology_by_id(request, herv_name):
                                       "text/tab-separated-values")
   tfs = request.args.get("id", [""])
   merge = request.args.get("merge", ["true"])[0] == "true"
+  herv_name = request.args.get("herv_name", ["unknown"])[0]
+  tf_name = request.args.get("tf_name", ["unknown"])[0]
+
   if merge:
+    file_name = "%s_%s_ontology_merged.tsv" % (herv_name, tf_name)
+    request.responseHeaders.addRawHeader("Content-Disposition",
+                                         'attachment; filename="%s"'%file_name)
     header = "#HERV/LR_type\tTF\tGO_Id\tDescription\tP_value\tFDR\tFER\tFold_enrichment\tHit_number\tHit_gene_number\tHit_genes"
     query = 'SELECT GO.HERV, T.TF, GO.GO_Id, GO.GO_description, GO.P_value, GO.FDR, GO.FER, GO.Fold_enrichment, GO.Hit_num, GO.Hit_gene_num, GO.HIT_genes FROM HCREs_GO_Merge AS GO NATURAL JOIN TFBS_Id AS T WHERE GO.HERV = "%s" and T.TF in (%s)'
   else:
+    file_name = "%s_%s_ontology.tsv" % (herv_name, tf_name)
+    request.responseHeaders.addRawHeader("Content-Disposition",
+                                         'attachment; filename="%s"'%file_name)
     header = "#HERV/LR_type\tTF\tCell\tGO_Id\tDescription\tP_value\tFDR\tFER\tFold_enrichment\tNumber_of_hit_HCREs\tNumber_of_hit_genes\tHit_genes"
     query = 'SELECT GO.HERV, T.TF, GO.Cell_name, GO.GO_Id, GO.GO_description, GO.P_value, GO.FDR, GO.FER, GO.Fold_enrichment, GO.Hit_num, GO.Hit_gene_num, GO.HIT_genes FROM HCREs_GO_Each AS GO NATURAL JOIN TFBS_Id AS T WHERE GO.HERV = "%s" and T.TF in (%s)'
   query %= (str(herv_name), ",".join('"%s"' % s for s in tfs))
   d = dbpool.runQuery(query)
   d.addCallback(lambda l: "\n".join([header]+["\t".join(map(str,t)) for t in l]))
   return d
-
-
 
 @app.route("/tf_list/<herv_name>")
 def tf_list(request, herv_name):
