@@ -391,7 +391,7 @@ def dl_hcre(request, herv_name):
   file_name = "%s_hsre.tsv" % (str(herv_name),)
   request.responseHeaders.addRawHeader("Content-Disposition",
                                        'attachment; filename="%s"'%file_name)
-  query = 'SELECT HC.HERV, T.TF, M.Motif_Id, M.Motif_name, M.Motif_origin, M.Start_in_consensus_seq, M.End_in_consensus_seq FROM(Motif_Id AS M NATURAL JOIN HCREs_Id AS HC) NATURAL JOIN TFBS_Id AS T WHERE HC.HERV = "%s";'
+  query = 'SELECT HC.HERV, T.TF, M.Motif_Id, M.Motif_name, M.Motif_origin, M.Start_in_consensus_seq, M.End_in_consensus_seq FROM(Motif_Id AS M NATURAL JOIN HCREs_Id AS HC) NATURAL JOIN TFBS_Id AS T WHERE HC.HERV = "%s" ;'
   query %= (str(herv_name), )
   d = dbpool.runQuery(query)
   d.addCallback(dl_hcre_format)
