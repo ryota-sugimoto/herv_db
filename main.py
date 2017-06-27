@@ -225,7 +225,7 @@ def dhs_depth(request, herv_name):
                                        "application/json")
   params = get_params(request)
   if params["representative"]:
-    query = 'SELECT DHS_data, Depth FROM DHS_depth WHERE HERV="%(herv_name)s" AND DHS_Data IN ("GM12878_Uwduke","H1-hESC_Uwduke","HeLa-S3_Uwduke","HUVEC_Uwduke","HepG2_Uwduke","K562_Uwduke","A549_Uwduke","MCF-7_Uwduke") AND Z_score >= %(z_score)s ORDER BY Z_score DESC LIMIT %(limit)s;'
+    query = 'SELECT DHS_data, Depth FROM DHS_depth WHERE HERV="%(herv_name)s" AND DHS_Data IN ("GM12878","H1-hESC","HeLa-S3","HUVEC","HepG2","K562","A549","MCF-7") AND Z_score >= %(z_score)s ORDER BY Z_score DESC LIMIT %(limit)s;'
   else:
     query = 'SELECT DHS_data, Depth FROM DHS_depth WHERE HERV="%(herv_name)s" AND Z_score >= %(z_score)s ORDER BY Z_score DESC LIMIT %(limit)s;'
   params["herv_name"] = str(herv_name)
