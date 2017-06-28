@@ -550,13 +550,25 @@ function set_select_options(herv_name) {
                         + ";tf_name="+tf_name);
   });
 
+  if ($("#recalled").prop("checked")) {
+    var recall_arg = "recalled=True";
+  } else {
+    var recall_arg = "recalled=False";
+  } 
+  if ($("#unique_reads").prop("checked")) {
+    var unique_reads_arg = "used_reads=unique";
+  } else {
+    var unique_reads_arg = "used_reads=all";
+  }
+  var hcre_args = "?" + recall_arg + ";" + unique_reads_arg;
   var hcre_anchor = document.getElementById("dl_hcre");
-  hcre_anchor.setAttribute("href", "/download/hcre/"+herv_name);
+  hcre_anchor.setAttribute("href", "/download/hcre/"+herv_name+hcre_args);
   
   var dhs_anchor = document.getElementById("dl_dhs_position");
   dhs_anchor.setAttribute("href", "/download/dhs_position/"+herv_name);
 }
-$("#merge_cell_types, #limit1").on("change", function () {
+$("#recalled, #unique_reads, #merge_cell_types, #limit1")
+.on("change", function () {
   var herv_name = location.hash.match(/^#!basic-info\/(.*)/m)[1];
   if (herv_name) {
     set_select_options(herv_name);
