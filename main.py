@@ -22,25 +22,25 @@ db = pymysql.connect(
 cursor = db.cursor()
 cursor.execute("SELECT HT.HERV_TFBS_Id, HT.HERV, T.TF, HT.Depth_based_z_score, HT.Count_based_z_score, HT.HCREs, Project, Recalled_peak, Used_read, Ratio_motif_TFBS_depth, HV.Integration_date FROM HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T NATURAL JOIN HERVs as HV where (HT.Depth_based_z_score >= 0 or HT.Count_based_z_score >= 0) and Ratio_motif_TFBS_depth >= 0;")
 
-res = cursor.fetchall()
+all_herv_file = gzip.open('herv_list_tmp.json.gz', 'wb')
 
-def json_gzip_all_herv(l):
-  res = {}
-  for id,herv,tf,d_z,c_z,hcre,project,recalled,alignment,depth_ratio,int_date in l:
-    if herv not in res:
-      res[herv] = {"tfs": [], "integration_date": int_date}
-    res[herv]["tfs"].append({ "id": id,
-                       "name": tf,
-                       "depth_based_z_score": d_z,
-                       "count_based_z_score": c_z,
-                       "hcre": hcre == "Yes",
-                       "project": project,
-                       "recalled": recalled,
-                       "alignment": alignment,
-                       "depth_ratio": depth_ratio})
-  return gzip.compress(json.dumps(res).encode('ascii'))
+res = {}
+for id,herv,tf,d_z,c_z,hcre,project,recalled,alignment,depth_ratio,int_date \
+  in cursor.fetchall():
+  if herv not in res:
+    res[herv] = {"tfs": [], "integration_date": int_date}
+  res[herv]["tfs"].append({ "id": id,
+                     "name": tf,
+                     "depth_based_z_score": d_z,
+                     "count_based_z_score": c_z,
+                     "hcre": hcre == "Yes",
+                     "project": project,
+                     "recalled": recalled,
+                     "alignment": alignment,
+                     "depth_ratio": depth_ratio})
+all_herv_file.write(json.dumps(res).encode('ascii'))
+all_herv_file.close()
 
-all_herv_data = json_gzip_all_herv(res)
 
 app = Klein()
 dbpool = adbapi.ConnectionPool("pymysql",
@@ -680,7 +680,7 @@ def herv_info(request, herv_name):
 def all_herv_list(request):
   request.responseHeaders.addRawHeader("Content-Type", "application/json")
   request.responseHeaders.addRawHeader("Content-Encoding", "gzip")
-  return all_herv_data
+  return File('herv_list_tmp.json.gz')
 
 @app.route("/all_tf_list")
 def all_tf_list(request):
