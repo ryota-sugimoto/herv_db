@@ -8,6 +8,40 @@ from klein import Klein
 import json
 import zlib
 
+import pymysql
+import json
+import gzip
+import sys
+
+db = pymysql.connect(
+  host='database-db-instance.cvtysiszh5lk.ap-northeast-1.rds.amazonaws.com',
+  user='web',
+  passwd='hervdb508',
+  db='Graph_db')
+
+cursor = db.cursor()
+cursor.execute("SELECT HT.HERV_TFBS_Id, HT.HERV, T.TF, HT.Depth_based_z_score, HT.Count_based_z_score, HT.HCREs, Project, Recalled_peak, Used_read, Ratio_motif_TFBS_depth, HV.Integration_date FROM HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T NATURAL JOIN HERVs as HV where (HT.Depth_based_z_score >= 0 or HT.Count_based_z_score >= 0) and Ratio_motif_TFBS_depth >= 0;")
+
+res = cursor.fetchall()
+
+def json_gzip_all_herv(l):
+  res = {}
+  for id,herv,tf,d_z,c_z,hcre,project,recalled,alignment,depth_ratio,int_date in l:
+    if herv not in res:
+      res[herv] = {"tfs": [], "integration_date": int_date}
+    res[herv]["tfs"].append({ "id": id,
+                       "name": tf,
+                       "depth_based_z_score": d_z,
+                       "count_based_z_score": c_z,
+                       "hcre": hcre == "Yes",
+                       "project": project,
+                       "recalled": recalled,
+                       "alignment": alignment,
+                       "depth_ratio": depth_ratio})
+  return gzip.compress(json.dumps(res).encode('ascii'))
+
+all_herv_data = json_gzip_all_herv(res)
+
 app = Klein()
 dbpool = adbapi.ConnectionPool("pymysql",
   host='database-db-instance.cvtysiszh5lk.ap-northeast-1.rds.amazonaws.com',
@@ -101,7 +135,7 @@ def tbfs_depth(request, herv_name):
     for t in l:
       d = {}
       d["name"] = t[0]
-      d["y"] = map(int, t[1].split(","))
+      d["y"] = list(map(int, t[1].split(",")))
       d["mode"] = "line"
       res.append(d)
     return json.dumps(res)
@@ -123,7 +157,7 @@ def tfbs_depth_by_id(request):
       d["herv"] = herv
       d["name"] = tf
       d["id"] = id
-      d["y"] = map(int, y.split(","))
+      d["y"] = list(map(int, y.split(",")))
       d["mode"] = "line"
       res.append(d)
     return json.dumps(res)
@@ -144,7 +178,7 @@ def motif_depth(request, herv_name):
     for tf,y in l:
       d = {}
       d["name"] = tf
-      d["y"] = map(int, y.split(","))
+      d["y"] = list(map(int, y.split(",")))
       d["mode"] = "line"
       res.append(d)
     return json.dumps(res)
@@ -166,7 +200,7 @@ def motif_depth_by_id(request):
       d["herv"] = herv
       d["name"] = tf
       d["id"] = id
-      d["y"] = map(int, y.split(","))
+      d["y"] = list(map(int, y.split(",")))
       d["mode"] = "line"
       res.append(d)
     return json.dumps(res)
@@ -277,7 +311,7 @@ def ortholog_map_json(t):
   for i,ss in enumerate(s.split("|")):
     l = ss.split(",")
     res["y"].append(i)
-    res["z"].append(map(int,l[1:]))
+    res["z"].append(list(map(int,l[1:])))
   return json.dumps([res])
 @app.route("/graph_data/ortholog/<herv_name>")
 def ortholog_graph(request, herv_name):
@@ -301,7 +335,7 @@ def TFBS_map_json(t):
   res["y"] = range(n_y)
   res["z"] = [[0] * n_x for _ in range(n_y)]
   for ix,(_,zz) in enumerate(t):
-    zz = map(int, zz.split(","))
+    zz = list(map(int, zz.split(",")))
     for iy,z in enumerate(zz):
       res["z"][iy][ix] = z
   return json.dumps([res])
@@ -342,7 +376,7 @@ def motif_map_json(t):
   res["y"] = range(n_y)
   res["z"] = [[0] * n_x for _ in range(n_y)]
   for ix,(_,_,zz) in enumerate(t):
-    zz = map(float, zz.split(","))
+    zz = list(map(float, zz.split(",")))
     for iy,z in enumerate(zz):
       res["z"][iy][ix] = z
   return json.dumps([res])
@@ -571,7 +605,7 @@ def dl_ontology(request, herv_name):
       query = 'SELECT GO.HERV, T.TF, GO.Cell_name, GO.GO_Id, GO.GO_description, GO.P_value, GO.FDR, GO.FER, GO.Fold_enrichment, GO.Hit_num, GO.Hit_gene_num, GO.HIT_genes FROM HCREs_GO_Each AS GO NATURAL JOIN TFBS_Id AS T WHERE GO.HERV = "%s" ;'
     query %= (str(herv_name),)
   d = dbpool.runQuery(query)
-  d.addCallback(lambda l: "\n".join([header]+["\t".join(map(str,t)) for t in l]))
+  d.addCallback(lambda l: "\n".join([header]+["\t".join(list(map(str,t))) for t in l]))
   return d
 
 @app.route("/download/ontology_by_id/<herv_name>")
@@ -597,7 +631,7 @@ def dl_ontology_by_id(request, herv_name):
     query = 'SELECT GO.HERV, T.TF, GO.Cell_name, GO.GO_Id, GO.GO_description, GO.P_value, GO.FDR, GO.FER, GO.Fold_enrichment, GO.Hit_num, GO.Hit_gene_num, GO.HIT_genes FROM HCREs_GO_Each AS GO NATURAL JOIN TFBS_Id AS T WHERE GO.HERV = "%s" and T.TF in (%s)'
   query %= (str(herv_name), ",".join('"%s"' % s for s in tfs))
   d = dbpool.runQuery(query)
-  d.addCallback(lambda l: "\n".join([header]+["\t".join(map(str,t)) for t in l]))
+  d.addCallback(lambda l: "\n".join([header]+["\t".join(list(map(str,t))) for t in l]))
   return d
 
 @app.route("/tf_list/<herv_name>")
@@ -645,25 +679,8 @@ def herv_info(request, herv_name):
 @app.route("/all_herv_list")
 def all_herv_list(request):
   request.responseHeaders.addRawHeader("Content-Type", "application/json")
-  query = "SELECT HT.HERV_TFBS_Id, HT.HERV, T.TF, HT.Depth_based_z_score, HT.Count_based_z_score, HT.HCREs, Project, Recalled_peak, Used_read, Ratio_motif_TFBS_depth, HV.Integration_date FROM HERV_TFBS_Id AS HT NATURAL JOIN TFBS_Id AS T NATURAL JOIN HERVs as HV where (HT.Depth_based_z_score >= 0 or HT.Count_based_z_score >= 0) and Ratio_motif_TFBS_depth >= 0;"
-  d = dbpool.runQuery(query)
-  def f(l):
-    res = {}
-    for id,herv,tf,d_z,c_z,hcre,project,recalled,alignment,depth_ratio,int_date in l:
-      if herv not in res:
-        res[herv] = {"tfs": [], "integration_date": int_date}
-      res[herv]["tfs"].append({ "id": id,
-                         "name": tf,
-                         "depth_based_z_score": d_z,
-                         "count_based_z_score": c_z,
-                         "hcre": hcre == "Yes",
-                         "project": project,
-                         "recalled": recalled,
-                         "alignment": alignment,
-                         "depth_ratio": depth_ratio})
-    return json.dumps(res)
-  d.addCallback(f)
-  return d
+  request.responseHeaders.addRawHeader("Content-Encoding", "gzip")
+  return all_herv_data
 
 @app.route("/all_tf_list")
 def all_tf_list(request):
